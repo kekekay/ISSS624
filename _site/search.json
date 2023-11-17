@@ -4,7 +4,7 @@
     "href": "index.html",
     "title": "ISSS624",
     "section": "",
-    "text": "Welcome to ISSS624 Geospatial Analytics Applications!\nIn this webpage, I am going to share with you my learning journey of geospatial analytics."
+    "text": "Welcome to ISSS624 Geospatial Analytics Applications!\nIn this webpage, I am going to share with you my learning(troubleshooting) journey of geospatial analytics."
   },
   {
     "objectID": "about.html",
@@ -12,5 +12,26 @@
     "title": "About",
     "section": "",
     "text": "About this site\n\n1 + 1\n\n[1] 2"
+  },
+  {
+    "objectID": "Hands-on 1.html",
+    "href": "Hands-on 1.html",
+    "title": "Hands-on Exercise 1: Geospatial Data Wrangling with R",
+    "section": "",
+    "text": "In this hands-on exercise, i learned how to import and wrangle geospatial data in using appropriate R packages."
+  },
+  {
+    "objectID": "Hands-on 1.html#overview",
+    "href": "Hands-on 1.html#overview",
+    "title": "Hands-on Exercise 1: Geospatial Data Wrangling with R",
+    "section": "",
+    "text": "In this hands-on exercise, i learned how to import and wrangle geospatial data in using appropriate R packages."
+  },
+  {
+    "objectID": "Hands-on 1.html#getting-started",
+    "href": "Hands-on 1.html#getting-started",
+    "title": "Hands-on Exercise 1: Geospatial Data Wrangling with R",
+    "section": "Getting Started",
+    "text": "Getting Started"
   }
 ]
