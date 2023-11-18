@@ -1,0 +1,14 @@
+{
+  "hash": "f3b792f18ad96e625837d2eaec09c906",
+  "result": {
+    "markdown": "---\ntitle: \"Hands-on Ex1: Geospatial Data Wrangling with R\"\n---\n\n\n# Overview\n\nIn this hands-on exercise, i learn how to import and wrangle geospatial data in using appropriate R packages.\n\n## **Getting Started**\n\n-   **sf** for importing, managing, and processing geospatial data, and\n\n-   **tidyverse** for performing data science tasks such as importing, wrangling and visualising data.\n\nTidyverse consists of a family of R packages. In this hands-on exercise, the following packages will be used:\n\n-   **readr** for importing csv data,\n\n-   **readxl** for importing Excel worksheet,\n\n-   **tidyr** for manipulating data,\n\n-   **dplyr** for transforming data, and\n\n-   **ggplot2** for visualising data\n\nThe code chunk below install and load sf and tidyverse packages into R environment.\n\n\n::: {.cell}\n\n```{.r .cell-code}\npacman::p_load(sf, tidyverse)\n```\n:::\n\n\n## **Importing Geospatial Data**\n\nhow to import the following geospatial data into R by using [*st_read()*](https://r-spatial.github.io/sf/reference/st_read.html) of **sf** package:\n\n-   `MP14_SUBZONE_WEB_PL`, a polygon feature layer in ESRI shapefile format,\n\n-   `CyclingPath`, a line feature layer in ESRI shapefile format, and\n\n-   `PreSchool`, a point feature layer in kml file format.\n\n### **Importing Polygon feature data**\n\nbelow uses *st_read()* function of **sf** package to import `MP14_SUBZONE_WEB_PL` shapefile into R as a polygon feature data frame. Note that when the input geospatial data is in shapefile format, two arguments will be used, namely: `dsn` to define the data path and `layer` to provide the shapefile name. Also note that no extension such as .shp, .dbf, .prj and .shx are needed.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nmpsz = st_read(dsn = \"data/geospatial\", \n                  layer = \"MP14_SUBZONE_WEB_PL\")\n```\n\n::: {.cell-output .cell-output-stdout}\n```\nReading layer `MP14_SUBZONE_WEB_PL' from data source \n  `C:\\kekekay\\ISSS624\\Hands-on Ex1\\data\\geospatial' using driver `ESRI Shapefile'\nSimple feature collection with 323 features and 15 fields\nGeometry type: MULTIPOLYGON\nDimension:     XY\nBounding box:  xmin: 2667.538 ymin: 15748.72 xmax: 56396.44 ymax: 50256.33\nProjected CRS: SVY21\n```\n:::\n:::\n\n\nwe can see the 'Geometry Type' is multipolygon\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

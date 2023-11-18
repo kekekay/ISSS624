@@ -8,11 +8,11 @@ website:
       - text: Hands-on Exercises
         menu: 
           - text: Hands-on Exercise 1
-            href: Hands-on 1.qmd
+            href: Hands-on 1.html
     right:
-      - href: index.qmd
+      - href: index.html
         text: Home
-      - about.qmd
+      - about.html
 
 format:
   html:
