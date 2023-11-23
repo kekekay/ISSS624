@@ -121,3 +121,5 @@ str(wm_q)
 ```
 
 This list shows complete weight matrix.
+
+### **Creating (ROOK) contiguity based neighbours**
