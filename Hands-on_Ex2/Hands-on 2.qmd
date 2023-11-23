@@ -1,0 +1,123 @@
+---
+title: "Hands-on Ex2"
+subtitle: "2nd date with Geospatial"
+date: "22 Nov 2023"
+date-modified: "last-modified"
+format: html
+execute: 
+  echo: true
+  eval: true
+  warning: false
+editor: visual
+---
+
+## Getting Started
+
+Ensure that **spdep**, **sf**, **tmap** and **tidyverse** packages of R are currently installed 
+
+```{r}
+pacman::p_load(sf, spdep, tmap, tidyverse, knitr)
+```
+
+## Bring in geospatial data in R
+
+Geospatial Data - ESRI shapefile
+
+Associated attribute table - csv file
+
+1.  Use **simple feature** of **sf**: *st_read()* for shapefile
+
+```{r}
+getwd()
+file.exists("data/geospatial")
+
+hunan <- st_read(dsn = "data/geospatial",layer = "Hunan")
+
+```
+
+2.  Import attributes csv. file - output: R dataframe class
+
+```{r}
+hunan2012 <- read.csv("data/aspatial/Hunan_2012.csv")
+hunan
+```
+
+3.  Performing relational join
+
+Using *left_join()* of **dplyr** package to update the attribute table of *hunan*'s SpatialPolygonsDataFrame with the attribute fields of *hunan2012* dataframe
+
+```{r}
+hunan <- left_join(hunan,hunan2012)%>% select(1:4,6,15)
+
+
+```
+
+only select column 1 - 4 and 7,15
+
+(the column 7 is GIC not GDPPC in my table, so i changed to column 6 in code)
+
+## **Visualising Regional Development Indicator**
+
+1.  Prepare a basemap and a choropleth map
+
+    to show distribution of GDPPC 2012 by using *qtm()* of **tmap** package
+
+```{r}
+basemap <- tm_shape(hunan) + tm_polygons() + tm_text("NAME_3",size = 0.5)
+gdppc <- qtm(hunan,"GDPPC")
+tmap_arrange(basemap,gdppc,asp=1,ncol=2)
+
+hunan
+
+
+```
+
+## **Computing Contiguity Spatial Weights**
+
+ use [*poly2nb()*](https://r-spatial.github.io/spdep/reference/poly2nb.html) of **spdep** package to compute contiguity weight matrices for the study area.
+
+The code chunk below is used to compute Queen contiguity weight matrix.
+
+```{r}
+pacman::p_load(spdep)
+wm_q <- poly2nb(hunan, queen=TRUE)
+summary(wm_q)
+```
+
+The summary report above shows that there are 88 area units in Hunan. The most connected area unit has 11 neighbours. There are two area units with only one heighbours.
+
+For each polygon in our polygon object, *wm_q* lists all neighboring polygons. For example, to see the neighbors for the first polygon in the object, type:
+
+```{r}
+wm_q[[1]]
+```
+
+This shows 1st polygon has 5 neighbours, the number is the IDs as stored in hunan SpatialPolygonsDataFrame class.
+
+We can retrive the county name of Polygon ID=1:
+
+```{r}
+hunan$NAME_3[1]
+```
+
+To reveal the county names of the five neighboring polygons:
+
+```{r}
+hunan$NAME_3[c(2,3,4,57,85)]
+```
+
+To retrieve the GDPPC of these five countries:
+
+```{r}
+nb1 <- wm_q[[1]]
+nb1 <- hunan$GDPPC[nb1]
+nb1
+```
+
+The printed output above shows that the GDPPC of the five nearest neighbours based on Queen's method are 20981, 34592, 24473, 21311 and 22879 respectively.
+
+```{r}
+str(wm_q)
+```
+
+This list shows complete weight matrix.
