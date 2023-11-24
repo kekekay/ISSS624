@@ -8,14 +8,14 @@ website:
       - text: Hands-on Exercises
         menu: 
           - text: Hands-on Exercise 1
-            href: Hands-on 1.html
+            href: Hands-on Ex1/Hands-on 1.html
           - text: Hands-on Exercise 2
-            href: Hands-on 2.html
+            href: Hands-on_Ex2/Hands-on 2.html
           
       - text: In-class Exercises
         menu: 
           - text: In-class Ex1
-            href: in-class exercise 1/in-class ex1.html
+            href: In-class exercise 1/in-class ex1.html
 
     right:
       - href: index.html
