@@ -8,7 +8,7 @@ website:
       - text: Hands-on Exercises
         menu: 
           - text: Hands-on Exercise 1
-            href: Hands-on Ex1/Hands-on 1.html
+            href: Hands-on Ex1/Hands-on Ex1.html
           - text: Hands-on Exercise 2
             href: Hands-on_Ex2\Hands-on 2.html
           
