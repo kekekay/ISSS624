@@ -20,12 +20,16 @@ website:
             href: In-class exercise 1/in-class_ex1.html
           - text: In-class Ex2
             href: In-class_2/In_class2-EHSA.html
+            
+      - text: Take Home Exercises
+        menu: 
+          - text: Take Home Exercise 1
 
 
     right:
       - href: index.html
         text: Home
-      - KE KE 
+      - KE KE's 
 
 format:
   html:
