@@ -1,0 +1,81 @@
+---
+title: "Hands-on Ex1: Geospatial Data Wrangling with R"
+---
+
+# Overview
+
+In this hands-on exercise, i learn how to import and wrangle geospatial data in using appropriate R packages.
+
+## **Getting Started**
+
+-   **sf** for importing, managing, and processing geospatial data, and
+
+-   **tidyverse** for performing data science tasks such as importing, wrangling and visualising data.
+
+Tidyverse consists of a family of R packages. In this hands-on exercise, the following packages will be used:
+
+-   **readr** for importing csv data,
+
+-   **readxl** for importing Excel worksheet,
+
+-   **tidyr** for manipulating data,
+
+-   **dplyr** for transforming data, and
+
+-   **ggplot2** for visualising data
+
+The code chunk below install and load sf and tidyverse packages into R environment.
+
+```{r}
+pacman::p_load(sf, tidyverse)
+```
+
+## **Importing Geospatial Data**
+
+how to import the following geospatial data into R by using [*st_read()*](https://r-spatial.github.io/sf/reference/st_read.html) of **sf** package:
+
+-   `MP14_SUBZONE_WEB_PL`, a polygon feature layer in ESRI shapefile format,
+
+-   `CyclingPath`, a line feature layer in ESRI shapefile format, and
+
+-   `PreSchool`, a point feature layer in kml file format.
+
+### **Importing Polygon feature data in shapefile form**
+
+below uses *st_read()* function of **sf** package to import `MP14_SUBZONE_WEB_PL` shapefile into R as a polygon feature data frame. Note that when the input geospatial data is in shapefile format, two arguments will be used, namely: `dsn` to define the data path and `layer` to provide the shapefile name. Also note that no extension such as .shp, .dbf, .prj and .shx are needed.
+
+```{r}
+mpsz = st_read(dsn = "data/geospatial", 
+                  layer = "MP14_SUBZONE_WEB_PL")
+```
+
+we can see the 'Geometry Type' is multipolygon
+
+### **Importing polyline feature data in shapefile form**
+
+below uses *st_read()* function of **sf** package to import `CyclingPath` shapefile into R as line feature data frame.
+
+```{r}
+getwd()
+cyclingpath = st_read(dsn = "data/geospatial", 
+                         layer = "CyclingPathGazette")
+```
+
+### **Importing GIS data in kml format**
+
+The code chunk below will be used to import the kml into R. 
+
+```{r}
+preschool = st_read("data/geospatial/PreSchoolsLocation.kml")
+```
+
+The message above reveals that `preschool` is a point feature data frame. There are a total of 1359 features and 2 fields. Different from the previous two simple feature data frame, preschool is in **wgs84** coordinates system.
+
+to be continued - 1.5
+
+## **Checking the Content of A Simple Feature Data Frame**
+
+```{r}
+st_geometry(mpsz)
+
+```

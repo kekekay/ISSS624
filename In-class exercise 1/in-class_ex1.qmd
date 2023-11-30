@@ -1,0 +1,73 @@
+---
+title: "In class ex1"
+subtitle: "first date with Geospatial"
+date: "18 Nov 2023"
+date-modified: "last-modified"
+format: html
+execute: 
+  echo: true
+  eval: true
+  warning: false
+editor: visual
+---
+
+## Getting Started
+
+load below 3 packages :
+
+-   tmap: for the thematic mapping
+
+-   sf: for s-geospatial data handling
+
+-   tidyverse: for non-spatial data handling
+
+```{r}
+pacman::p_load(tmap,sf,tidyverse)
+
+```
+
+## Importing the OD data
+
+Firstly, we will import the **Passenger Volume by origin destination bus stop dataset** downloaded from LTA Datamall by using 'read_csv()' of *readr* package.
+
+```{r}
+odbus <- read_csv("data/aspatial/origin_destination_bus_202308.csv")
+
+```
+
+august
+
+```{r}
+#| eval: false
+odbus$ORIGIN_PT_CODE <-
+as.factor(odbus$ORIGIN_PT_CODE)
+odbus$DESTINATION_PT_CODE <-
+as.factor(odbus$DESTINATION_PT_CODE)
+```
+
+```{r}
+
+#| eval:false
+
+origtrip_7_9 <- odbus %>%
+  filter(DAY_TYPE == "WEEKDAY") %>%
+  filter(TIME_PER_HOUR >= 7 &
+           TIME_PER_HOUR <= 9) %>%
+  group_by(ORIGIN_PT_CODE) %>%
+  summarise(TRIPS = sum(TOTAL_TRIPS))
+```
+
+```{r}
+
+busstop <- st_read(dsn = "Data/geospatial",
+                   layer = "BusStop") %>%
+  st_transform(crs = 3414)
+
+```
+
+```{r}
+mpsz <- st_read(dsn = "data/geospatial",
+                layer = "MPSZ-2019") %>%
+st_transform(crs=3414)
+mpsz
+```

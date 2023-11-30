@@ -1,0 +1,51 @@
+---
+title: "In_class_2"
+---
+
+# Getting Started 
+
+Import packages
+
+```{r}
+pacman::p_load(sf, tmap, sfdep,tidyverse, knitr,plotly)
+```
+
+Import attribute files and join
+
+```{r}
+getwd() 
+hunan <- st_read("data/geospatial",layer = "Hunan") 
+hunan2012 <- read.csv("data/aspatial/Hunan_2012.csv") 
+```
+
+sfdep - time cube
+
+```{r}
+hunan_GDPPC<- left_join(hunan,hunan2012)%>% select(1:4,7,15)
+```
+
+1st - spatial layer
+
+2nd - non spatial layer
+
+## Deriving contiguity weights: Queen's method
+
+```{r}
+wm_q <- hunan_GDPPC %>%   
+  mutate(nb = st_contiguity(geometry),          
+         wt = st_weights(nb, 
+                         style = "W"),          
+         .before = 1)
+```
+
+# Computing local Moran's I
+
+use local_moran() of sfdep package to compute local moran's I of GDPPC at county level
+
+```{r}
+lisa <- wm_q %>% 
+  mutate(local_moran = local_moran( 
+    GDPPC, nb, wt, nsim = 99), 
+    .before = 1) %>% 
+  unnest(local_moran)
+```

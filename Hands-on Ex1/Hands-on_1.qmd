@@ -1,0 +1,9 @@
+---
+title: "Hands-on Exercise 1: Geospatial Data Wrangling with R"
+---
+
+## **Overview**
+
+In this hands-on exercise, i learned how to import and wrangle geospatial data in using appropriate R packages.
+
+## Getting Started

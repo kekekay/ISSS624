@@ -1,0 +1,137 @@
+---
+title: "In_class_2"
+date: "25 Novemeber 2023"
+date-modified: "last-modified"
+format: html
+---
+
+# Getting Started
+
+Import packages
+
+```{r}
+pacman::p_load(sf, tmap, sfdep,tidyverse, knitr,plotly)
+```
+
+Import attribute files and join
+
+```{r}
+getwd() 
+hunan <- st_read("data/geospatial",layer = "Hunan") 
+hunan2012 <- read.csv("data/aspatial/Hunan_2012.csv") 
+```
+
+sfdep - time cube
+
+```{r}
+hunan_GDPPC<- left_join(hunan,hunan2012)%>% select(1:4,7,15)
+```
+
+1st - spatial layer
+
+2nd - non spatial layer
+
+## Deriving contiguity weights: Queen's method
+
+```{r}
+wm_q <- hunan_GDPPC %>%   
+  mutate(nb = st_contiguity(geometry),          
+         wt = st_weights(nb, 
+                         style = "W"),          
+         .before = 1)
+```
+
+# **Global Spatial Autocorrelation**
+
+## Computing local Moran's I
+
+use local_moran() of sfdep package to compute local moran's I of GDPPC at county level
+
+```{r}
+lisa <- wm_q %>% 
+  mutate(local_moran = local_moran( 
+    GDPPC, nb, wt, nsim = 99), 
+    .before = 1) %>% 
+  unnest(local_moran)
+```
+
+## Time Series Cube
+
+```{r}
+GDPPC <- read_csv("data/aspatial/Hunan_GDPPC.csv")
+```
+
+```{r}
+GDPPC_st <- spacetime(GDPPC, hunan, 
+                      .loc_col = "County",
+                      .time_col = "Year")
+is_spacetime_cube(GDPPC)
+```
+
+```{r}
+pacman::p_load(zoo,Kendall)
+
+
+```
+
+```{r}
+is_spacetime_cube(GDPPC_st)
+```
+
+```{r}
+GDPPC_nb <- GDPPC_st %>%
+  activate("geometry") %>%
+  mutate(nb =include_self(st_contiguity(geometry)),
+         wt = st_inverse_distance(nb,geometry,
+                                  scale = 1,
+                                  alpha=1),
+         .before = 1) %>%
+  set_nbs("nb") %>%
+  set_wts("wt")
+```
+
+Computing GI\*
+
+```{r}
+
+gi_stars <- GDPPC_nb %>%
+  group_by(Year) %>%
+  mutate(gi_star = local_gstar_perm(
+    GDPPC, nb, wt)) %>%
+  tidyr::unnest(gi_star)
+```
+
+# Performing Emerging hotspot analysis
+
+## Visualising the distribution of EHSA classes
+
+```{r}
+#install.packages("Kendall", repos = "https://cloud.r-project.org")
+library(Kendall)
+```
+
+```{r}
+ehsa <- emerging_hotspot_analysis(
+  x = GDPPC_st,
+  .var = "GDPPC",
+  k = 1,
+  nsim = 99
+)
+
+hunan_ehsa <- hunan %>%
+  left_join(ehsa,
+            by = join_by(County==location))
+```
+
+```{r}
+ehsa_sig <- hunan_ehsa %>%
+  filter(p_value < 0.05)
+
+tmap_mode("plot")
+tm_shape(hunan_ehsa) +
+  tm_polygons +
+  tm_borders(alpha = 0.5) +
+tm_shape(ehsa_sig) +
+  tm_fill("classification") +
+  tm_borders(alpha = 0.4)
+```
