@@ -2,8 +2,6 @@
 title: "About"
 ---
 
-About this site
+Welcome to ISSS624 Geospatial Analytics Applications!
 
-```{r}
-1 + 1
-```
+In this webpage, I am going to share with you my learning(troubleshooting) journey of geospatial analytics.

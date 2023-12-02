@@ -20,6 +20,8 @@ website:
             href: In-class exercise 1/in-class_ex1.html
           - text: In-class Ex2
             href: In-class_2/In_class2-EHSA.html
+          - text: In-class Ex3
+            href: In-class_Ex3/Inclass_ex3.html
             
       - text: Take Home Exercises
         menu: 
