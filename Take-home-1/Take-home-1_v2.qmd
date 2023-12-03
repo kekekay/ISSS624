@@ -327,7 +327,7 @@ gridid4_7 <- gridid4_7 %>%
   filter(!is.na(TRIPS) & TRIPS > 0)
 ```
 
-## **Choropleth Visualisation**
+## **3. Choropleth Visualisation**
 
 ### **6-9am weekday peak hours**
 
@@ -490,7 +490,7 @@ map_hex
 
 For the **Weekend/Holiday Evening Peak Hours from 4pm to 7pm**, the map would likely show the movement patterns as people conclude their leisure activities or return from day trips. Areas with higher activity could include shopping districts, entertainment venues, or parks, reflecting where people spend their weekend afternoons. The map might also highlight transit routes leading back to residential areas, indicating the flow of people heading home. This visualization is invaluable for transit planners to understand and respond to weekend evening travel habits, ensuring efficient and adequate transportation services during these times, and enhancing the overall weekend travel experience.
 
-## 3. Local Indicators of Spatial Association (LISA) Analysis
+## 4. Local Indicators of Spatial Association (LISA) Analysis
 
 LISA analysis helps in identifying clusters of high or low values (e.g. areas with high or low bus ridership) and can be particularly informative for spatial planning and analysis.
 
@@ -580,6 +580,7 @@ if (!("sf" %in% class(merged_data6_9))) {
 
 ```{r}
 # Step 3: Recreate the neighbor list and spatial weights
+pacman::p_load(spData,spdep)
 listw <- nb2listw(merged_data6_9$nb, style = "W")
 nrow(merged_data6_9)
 length(listw$neighbours)
@@ -609,7 +610,7 @@ Mapping the local Moran's I: Before mapping the local Moran's I map, it is wise 
 merged_data6_9.localMI69 <- cbind(merged_data6_9,localMI69) %>% rename(Pr.Ii = Pr.z....E.Ii..)
 ```
 
-Mapping local Moran\'s I values
+Mapping local Moran's I values
 
 ```{r}
 map_moran69_i <- tm_shape(merged_data6_9.localMI69) +
@@ -630,7 +631,7 @@ map_moran69_i <- tm_shape(merged_data6_9.localMI69) +
 
 ```
 
-Mapping local Moran\'s I p-values
+Mapping local Moran's I p-values
 
 ```{r}
 map_moran69_p <- tm_shape(merged_data6_9.localMI69) +
