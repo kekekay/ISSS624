@@ -15,13 +15,13 @@ editor: visual
 
 The urban public transport system generates vast amounts of spatiotemporal trajectory data daily, encompassing bus card swipes and GPS location tracking. When this data is complete and accurate, merging bus card transaction data with GPS positioning easily yields valuable information on passengers' boarding points. This integrated data offers a comprehensive view of transit usage patterns, enhancing our understanding of urban mobility. Analyzing this rich dataset enables the identification of key trends and behaviors in public transportation usage, providing critical insights for city planners and transport authorities to optimize routes, improve service efficiency, and enhance the overall commuter experience.
 
-### 2 Getting Started
+## 2. Getting Started
 
 Below libraries will be used:
 
 **sf (Simple Features for R)**: handling spatial data in R. It provides simple, consistent functions for working with spatial vector data (points, lines, polygons).
 
-**sfdep**: provides an interface to \'spdep\' to integrate with \'sf\' objects and the \'tidyverse\'. It will be used for conducting Exploratory Spatial Data Analysis.
+**sfdep**: provides an interface to 'spdep' to integrate with 'sf' objects and the 'tidyverse'. It will be used for conducting Exploratory Spatial Data Analysis.
 
 **tmap:** provides a set of functions and tools for creating thematic maps such as choropleths 
 
@@ -416,7 +416,7 @@ map_hex
 
 The **5-8 pm weekday** choropleth map captures the unique dynamics of evening commuting patterns. It vividly displays areas of heightened activity, likely representing major commercial centers and business districts where people depart from at the end of the workday. The varied shades across the hexagonal grid indicate a diverse distribution of bus ridership, with some zones experiencing higher traffic, possibly reflecting major transit routes or nodes. This map helps understand the evening dispersal patterns in urban transit, providing key insights for optimizing bus services during these peak hours. Also in identifying areas that might benefit from increased service frequency or capacity enhancements to accommodate the high volume of commuters heading home.
 
-###  **11am-2pm Weekend/Holiday Morning Peak Hours**
+### **11am-2pm Weekend/Holiday Morning Peak Hours**
 
 ```{r}
 total_trips_by_grid <- gridid11_2 %>%
@@ -453,7 +453,7 @@ map_hex
 
 For the **Weekend/Holiday Morning Peak between 11am and 2pm**, the map likely illustrates a distinct pattern compared to typical weekday commuting hours. This period often encompasses leisure or shopping activities, and the map could reveal areas of high pedestrian traffic such as malls, parks, or tourist attractions. Denser areas on the map might indicate popular weekend destinations or residential areas from which people commonly venture out during these hours. Such a visualization is particularly valuable for understanding weekend mobility trends, guiding public transport adjustments to cater to non-work-related travel, and enhancing overall service quality during leisure peak times.
 
-###  **4pm-7pm Weekend/Holiday Evening Peak Hours**
+### **4pm-7pm Weekend/Holiday Evening Peak Hours**
 
 ```{r}
 total_trips_by_grid <- gridid11_2 %>%
@@ -489,3 +489,433 @@ map_hex
 ```
 
 For the **Weekend/Holiday Evening Peak Hours from 4pm to 7pm**, the map would likely show the movement patterns as people conclude their leisure activities or return from day trips. Areas with higher activity could include shopping districts, entertainment venues, or parks, reflecting where people spend their weekend afternoons. The map might also highlight transit routes leading back to residential areas, indicating the flow of people heading home. This visualization is invaluable for transit planners to understand and respond to weekend evening travel habits, ensuring efficient and adequate transportation services during these times, and enhancing the overall weekend travel experience.
+
+## 3. Local Indicators of Spatial Association (LISA) Analysis
+
+LISA analysis helps in identifying clusters of high or low values (e.g. areas with high or low bus ridership) and can be particularly informative for spatial planning and analysis.
+
+### **Create a Neighbors List**
+
+```{r}
+getwd()
+```
+
+```{r}
+neighbours <- total_trips_by_grid_sf %>%
+  mutate(nb = st_contiguity(area_hexagon_grid))
+
+neighbours <- neighbours %>%
+  filter(!sapply(nb, function(x) any(x == 0)))
+
+# Now, you can proceed with creating the weights
+neighbours <- neighbours %>%
+  mutate(
+    wt = st_weights(nb, style = "W"),
+    .before = 1
+  )
+
+```
+
+```{r}
+# Check for empty neighbor first
+no_neighbours <- which(map_int(neighbours, length) == 0)
+
+if (length(no_neighbours) > 0) {
+  cat("Empty neighbours:", no_neighbours, "\n")
+} else {
+  cat("No empty neighbour found.\n")
+}
+```
+
+### Neighbours list Map
+
+```{r}
+
+
+tmap_mode("plot")
+
+map_v <- tm_shape(neighbours) +
+  tm_fill(
+    col = "total_trips",
+    palette = "RdYlBu",
+    style = "quantile",
+    title = "Trip sizes"
+  ) +
+  tm_layout(main.title = "Total Bus Trips ",
+            main.title.size = 1,
+            main.title.position = "center",
+            legend.position = c("left", "top"),
+            legend.height = .6,
+            legend.width = .2,
+            frame = FALSE
+            
+  )
+
+map_v
+
+
+
+
+
+```
+
+### Perform Moran's I
+
+#### Weekday Morning Peak 6am-9am
+
+```{r}
+
+set.seed(1234)
+# Step 1: Merge the data of list and grid id 
+merged_data6_9 <- neighbours %>% 
+  left_join(gridid6_9, by = "grid_id")
+
+# Step 2: Prepare the data
+# make sure it's sf object 
+if (!("sf" %in% class(merged_data6_9))) {
+  merged_data6_9 <- st_as_sf(merged_data6_9, geom_col = "area_hexagon_grid")
+}
+
+```
+
+```{r}
+# Step 3: Recreate the neighbor list and spatial weights
+listw <- nb2listw(merged_data6_9$nb, style = "W")
+nrow(merged_data6_9)
+length(listw$neighbours)
+
+```
+
+**Computing local Moran's I**
+
+```{r}
+# Recreate neighbors list
+nei2 <- poly2nb(merged_data6_9)
+
+# Convert neighbors to spatial weights list
+listw2 <- nb2listw(nei2, style = "W", zero.policy = TRUE)
+
+fip69 <- order(merged_data6_9$BUS_STOP_N)
+localMI69 <- localmoran(merged_data6_9$total_trips, listw2)
+head(localMI69)
+
+
+
+```
+
+Mapping the local Moran's I: Before mapping the local Moran's I map, it is wise to append the local Moran's I dataframe (i.e. localMI) onto SpatialPolygonDataFrame.
+
+```{r}
+merged_data6_9.localMI69 <- cbind(merged_data6_9,localMI69) %>% rename(Pr.Ii = Pr.z....E.Ii..)
+```
+
+Mapping local Moran\'s I values
+
+```{r}
+map_moran69_i <- tm_shape(merged_data6_9.localMI69) +
+  tm_fill(
+    col = "Ii",
+    palette = "OrRd",
+    style = "pretty",
+    title = "Local Moran's I"
+  ) +
+  tm_layout(main.title = "Weekday Morning 6-9 - local moran statistics",
+            main.title.size = 1,
+            main.title.position = "center",
+            legend.position = c("left", "top"),
+            legend.height = .6,
+            legend.width = .2,
+            frame = FALSE
+  )
+
+```
+
+Mapping local Moran\'s I p-values
+
+```{r}
+map_moran69_p <- tm_shape(merged_data6_9.localMI69) +
+  tm_fill(
+    col = "Pr.Ii",
+    palette = "BuGn",
+    style = "pretty",
+    title = "Weekday Morning 6-9 - local Moran's I p"
+  ) +
+  tm_layout(
+            main.title.size = 1,
+            main.title.position = "center",
+            legend.position = c("left", "top"),
+            legend.height = .6,
+            legend.width = .2,
+            frame = FALSE
+  )
+
+```
+
+#### **Weekday Afternoon Peak Hours**
+
+```{r}
+set.seed(1234)
+# Step 1: Merge the data of list and grid id 
+merged_data5_8 <- neighbours %>% 
+  left_join(gridid5_8, by = "grid_id")
+
+# Step 2: Prepare the data
+# make sure it's sf object 
+if (!("sf" %in% class(merged_data5_8))) {
+  merged_data5_8 <- st_as_sf(merged_data5_8, geom_col = "area_hexagon_grid")
+}
+# Step 3: Recreate the neighbor list and spatial weights
+listw <- nb2listw(merged_data5_8$nb, style = "W")
+nrow(merged_data5_8)
+length(listw$neighbours)
+
+# Recreate neighbors list
+nei58 <- poly2nb(merged_data5_8)
+
+# Convert neighbors to spatial weights list
+listw58 <- nb2listw(nei58, style = "W", zero.policy = TRUE)
+
+fip58 <- order(merged_data5_8$BUS_STOP_N)
+localMI58 <- localmoran(merged_data5_8$total_trips, listw58)
+head(localMI58)
+
+merged_data5_8.localMI58 <- cbind(merged_data5_8,localMI58) %>% rename(Pr.Ii = Pr.z....E.Ii..)
+
+map_moran58_i <- tm_shape(merged_data5_8.localMI58) +
+  tm_fill(
+    col = "Ii",
+    palette = "OrRd",
+    style = "pretty",
+    title = "Local Moran's I"
+  ) +
+  tm_layout(main.title = "Weekday Afternoon 5-8 - local moran statistics",
+            main.title.size = 1,
+            main.title.position = "center",
+            legend.position = c("left", "top"),
+            legend.height = .6,
+            legend.width = .2,
+            frame = FALSE
+  )
+map_moran58_p <- tm_shape(merged_data5_8.localMI58) +
+  tm_fill(
+    col = "Pr.Ii",
+    palette = "BuGn",
+    style = "pretty",
+    title = "Weekday Afternoon 5-8 - local Moran's I p"
+  ) +
+  tm_layout(
+            main.title.size = 1,
+            main.title.position = "center",
+            legend.position = c("left", "top"),
+            legend.height = .6,
+            legend.width = .2,
+            frame = FALSE
+  )
+```
+
+#### **Weekend/Holiday Morning Peak Hours**
+
+```{r}
+set.seed(1234)
+# Step 1: Merge the data of list and grid id 
+merged_data112 <- neighbours %>% 
+  left_join(gridid11_2, by = "grid_id")
+
+# Step 2: Prepare the data
+# make sure it's sf object 
+if (!("sf" %in% class(merged_data112))) {
+  merged_data112 <- st_as_sf(merged_data112, geom_col = "area_hexagon_grid")
+}
+# Step 3: Recreate the neighbor list and spatial weights
+listw <- nb2listw(merged_data112$nb, style = "W")
+nrow(merged_data112)
+length(listw$neighbours)
+
+# Recreate neighbors list
+nei112 <- poly2nb(merged_data112)
+
+# Convert neighbors to spatial weights list
+listw112 <- nb2listw(nei112, style = "W", zero.policy = TRUE)
+
+fip112 <- order(merged_data112$BUS_STOP_N)
+localMI112 <- localmoran(merged_data112$total_trips, listw112)
+head(localMI112)
+
+merged_data112.localMI112 <- cbind(merged_data112,localMI112) %>% rename(Pr.Ii = Pr.z....E.Ii..)
+
+map_moran112_i <- tm_shape(merged_data112.localMI112) +
+  tm_fill(
+    col = "Ii",
+    palette = "YlGn",
+    style = "pretty",
+    title = "Local Moran's I"
+  ) +
+  tm_layout(main.title = "Holiday 11am-2pm - local moran statistics",
+            main.title.size = 1,
+            main.title.position = "center",
+            legend.position = c("left", "top"),
+            legend.height = .6,
+            legend.width = .2,
+            frame = FALSE
+  )
+map_moran112_p <- tm_shape(merged_data112.localMI112) +
+  tm_fill(
+    col = "Pr.Ii",
+    palette = "Set3",
+    style = "pretty",
+    title = "Holiday 11am-2pm  - local Moran's I p"
+  ) +
+  tm_layout(
+            main.title.size = 1,
+            main.title.position = "center",
+            legend.position = c("left", "top"),
+            legend.height = .6,
+            legend.width = .2,
+            frame = FALSE
+  )
+```
+
+#### **Weekend/Holiday Evening Peak Hours**
+
+```{r}
+set.seed(1234)
+# Step 1: Merge the data of list and grid id 
+merged_data47 <- neighbours %>% 
+  left_join(gridid4_7, by = "grid_id")
+
+# Step 2: Prepare the data
+# make sure it's sf object 
+if (!("sf" %in% class(merged_data47))) {
+  merged_data47 <- st_as_sf(merged_data47, geom_col = "area_hexagon_grid")
+}
+# Step 3: Recreate the neighbor list and spatial weights
+listw <- nb2listw(merged_data47$nb, style = "W")
+nrow(merged_data47)
+length(listw$neighbours)
+
+# Recreate neighbors list
+nei47 <- poly2nb(merged_data47)
+
+# Convert neighbors to spatial weights list
+listw47 <- nb2listw(nei47, style = "W", zero.policy = TRUE)
+
+fip47 <- order(merged_data47$BUS_STOP_N)
+localMI47 <- localmoran(merged_data47$total_trips, listw47)
+head(localMI47)
+
+merged_data47.localMI47 <- cbind(merged_data47,localMI47) %>% rename(Pr.Ii = Pr.z....E.Ii..)
+
+map_moran47_i <- tm_shape(merged_data47.localMI47) +
+  tm_fill(
+    col = "Ii",
+    palette = "YlGn",
+    style = "pretty",
+    title = "Local Moran's I"
+  ) +
+  tm_layout(main.title = "Holiday 4-7pm - local moran statistics",
+            main.title.size = 1,
+            main.title.position = "center",
+            legend.position = c("left", "top"),
+            legend.height = .6,
+            legend.width = .2,
+            frame = FALSE
+  )
+map_moran47_p <- tm_shape(merged_data47.localMI47) +
+  tm_fill(
+    col = "Pr.Ii",
+    palette = "Set3",
+    style = "pretty",
+    title = "Holiday 4-7pm  - local Moran's I p"
+  ) +
+  tm_layout(
+            main.title.size = 1,
+            main.title.position = "center",
+            legend.position = c("left", "top"),
+            legend.height = .6,
+            legend.width = .2,
+            frame = FALSE
+  )
+```
+
+```{r}
+tmap_arrange(map_moran69_i, map_moran69_p,
+             map_moran58_i, map_moran58_p,
+             map_moran112_i, map_moran112_p,
+             map_moran47_i, map_moran47_p,
+             ncol = 2)
+```
+
+```{r}
+quadrant69 <- vector(mode="numeric",length=nrow(localMI69))
+quadrant58 <- vector(mode="numeric",length=nrow(localMI58))
+quadrant112 <- vector(mode="numeric",length=nrow(localMI112))
+quadrant47 <- vector(mode="numeric",length=nrow(localMI47))
+```
+
+```{r}
+
+
+lag_merged_data6_9$total_trips <- lag.listw(listw2, merged_data6_9$total_trips)
+DV69 <- hunan$lag_GDPPC - mean(hunan$lag_GDPPC)     
+```
+
+```{r}
+tmap_mode("plot")
+
+plot_69_all <- 
+  tm_shape(merged_data6_9.localMI69) +
+  tm_fill(
+    col = "Ii",
+    style = "cat",
+    palette = "Spectral"
+  ) +
+  tm_layout(
+    main.title = "Map 1: Local Moran Clusters",
+    main.title.size = 1,
+    main.title.position = "center",
+    frame = FALSE)
+
+mean_69 <- merged_data6_9.localMI69  %>%
+  filter(Ii <= 0.05)
+
+mean_69_p <- merged_data6_9.localMI69  %>%
+  filter(Pr.Ii <= 0.05)
+
+plot_69_mean <- 
+  tm_shape(merged_data6_9.localMI69) +
+  tm_polygons(
+    col = "#ffffff"
+  ) +
+  tm_borders(col = NA) +
+  tm_shape(mean_69) +
+  tm_fill(
+    col = "Ii",
+    style = "cat",
+    palette = "PuRd"
+  ) +
+  tm_layout(
+    main.title = "Map 2: Local Moran Clusters (P value is 0.05 or lesser)",
+    main.title.size = 1,
+    main.title.position = "center",
+    frame = FALSE)
+
+plot_69_mean_p <- 
+  tm_shape(merged_data6_9.localMI69) +
+  tm_polygons(
+    col = "#ffffff"
+  ) +
+  tm_borders(col = NA) +
+  tm_shape(mean_69_p) +
+  tm_fill(
+    col = "Ii",
+    style = "cat",
+    palette = "PuRd"
+  ) +
+  tm_layout(
+    main.title = "Map 3: Local Moran Clusters Simulated (P value is 0.05 or lesser)",
+    main.title.size = 1,
+    main.title.position = "center",
+    frame = FALSE)
+
+plot_69_all
+```
