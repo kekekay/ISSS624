@@ -1,0 +1,491 @@
+---
+title: "Take Home Exercise 1a:Geovisualisation and Analysis"
+date: "27 Novemeber 2023"
+date-modified: "last-modified"
+author: Ke Ke
+format: html
+execute:
+  echo: true
+  eval: true
+  warning: false
+editor: visual
+---
+
+## 1. Overview
+
+The urban public transport system generates vast amounts of spatiotemporal trajectory data daily, encompassing bus card swipes and GPS location tracking. When this data is complete and accurate, merging bus card transaction data with GPS positioning easily yields valuable information on passengers' boarding points. This integrated data offers a comprehensive view of transit usage patterns, enhancing our understanding of urban mobility. Analyzing this rich dataset enables the identification of key trends and behaviors in public transportation usage, providing critical insights for city planners and transport authorities to optimize routes, improve service efficiency, and enhance the overall commuter experience.
+
+### 2 Getting Started
+
+Below libraries will be used:
+
+**sf (Simple Features for R)**: handling spatial data in R. It provides simple, consistent functions for working with spatial vector data (points, lines, polygons).
+
+**sfdep**: provides an interface to \'spdep\' to integrate with \'sf\' objects and the \'tidyverse\'. It will be used for conducting Exploratory Spatial Data Analysis.
+
+**tmap:** provides a set of functions and tools for creating thematic maps such as choropleths 
+
+```{r}
+pacman::p_load(sf, sfdep, tmap, tidyverse, knitr, dplyr)
+```
+
+### **Importing Geospatial data into R**
+
+Firstly, we load in our data:
+
+-   *Bus Stop Location* from LTA DataMall. It provides information about all the bus stops currently being serviced by buses, including the bus stop code (identifier) and location coordinates.
+
+The code chunk below uses *st_read()* function of **sf** package to import `BusStop` shape file into R as a polygon feature data frame. The imported shape file will be a **simple features** object of **sf**.
+
+```{r}
+getwd()
+busstop <- st_read(dsn = "Data/geospatial",layer = "BusStop")
+glimpse(busstop)
+```
+
+From the result, we can see there are total 5161 multipolygons features with 3 fields in `busstop.`
+
+Checking for missing values in bus stop data:
+
+```{r}
+sum(is.na(busstop))
+sapply(busstop, function(x) sum(is.na(x)))
+```
+
+There are total 9 missing value and let's take a further look to decide whether to drop it:
+
+```{r}
+
+# Filtering rows with missing values in BUS_ROOF_N
+missing_bus_roof_n <- busstop %>% 
+                      filter(is.na(BUS_ROOF_N))
+# Viewing the rows with missing BUS_ROOF_N
+head(missing_bus_roof_n)
+
+# Filtering rows with missing values in LOC_DESC
+missing_loc_desc <- busstop %>% 
+                    filter(is.na(LOC_DESC))
+# Viewing the rows with missing LOC_DESC
+head(missing_loc_desc)
+
+```
+
+Since this analysis is argely geographical (e.g., mapping bus stop locations), missing values in BUS_ROOF_N and LOC_DESC may not significantly impact the results, as the key geometrical data (coordinates of bus stops) is intact.
+
+### **Importing attribute data into R**
+
+```{r}
+odbus <- read.csv("data/aspatial/origin_destination_bus_202310.csv")
+glimpse(odbus)
+```
+
+Checking for missing values:
+
+```{r}
+sum(is.na(odbus))
+
+```
+
+there is no missing value and proceed to view the rows in *odbus:*
+
+```{r}
+head(odbus)
+```
+
+the **`ORIGIN_PT_CODE`** and **`DESTINATION_PT_CODE`** columns represent categorical data rather than numerical values. In R, factors are used to handle categorical variables which are stored as levels.
+
+```{r}
+#Convert the 2 columns to factors 
+odbus$ORIGIN_PT_CODE <- as.factor(odbus$ORIGIN_PT_CODE)
+odbus$DESTINATION_PT_CODE <- as.factor(odbus$DESTINATION_PT_CODE) 
+
+```
+
+### Filter and aggregate the origin-destination data (`odbus`) for specific time periods
+
+A summarized view of trip data for specific time periods, which can be very useful for understanding travel patterns during peak hours.
+
+| Peak hour period             | Bus tap on time | Data name      |
+|------------------------------|-----------------|----------------|
+| Weekday morning peak         | 6am to 9am      | *origin6_9wdm* |
+| Weekday afternoon peak       | 5pm to 8pm      | *origin5_8wda* |
+| Weekend/holiday morning peak | 11am to 2pm     | *origin11_2hm* |
+| Weekend/holiday evening peak | 4pm to 7pm      | *origin4_7he*  |
+
+```{r}
+origin6_9wdm <- odbus %>%
+  filter(DAY_TYPE == "WEEKDAY") %>%
+  filter(TIME_PER_HOUR >= 6 &
+           TIME_PER_HOUR <= 9) %>%
+  group_by(ORIGIN_PT_CODE) %>%
+  summarise(TRIPS = sum(TOTAL_TRIPS))
+
+
+```
+
+```{r}
+origin5_8wda <- odbus %>%
+  filter(DAY_TYPE == "WEEKDAY") %>%
+  filter(TIME_PER_HOUR >= 17 &
+           TIME_PER_HOUR <= 20) %>%
+  group_by(ORIGIN_PT_CODE) %>%
+  summarise(TRIPS = sum(TOTAL_TRIPS))
+
+
+```
+
+```{r}
+origin11_2hm <- odbus %>%
+  filter(DAY_TYPE == "WEEKENDS/HOLIDAY") %>%
+  filter(TIME_PER_HOUR >= 11 &
+           TIME_PER_HOUR <= 14) %>%
+  group_by(ORIGIN_PT_CODE) %>%
+  summarise(TRIPS = sum(TOTAL_TRIPS))
+
+
+```
+
+```{r}
+origin4_7he <- odbus %>%
+  filter(DAY_TYPE == "WEEKENDS/HOLIDAY") %>%
+  filter(TIME_PER_HOUR >= 16 &
+           TIME_PER_HOUR <= 19) %>%
+  group_by(ORIGIN_PT_CODE) %>%
+  summarise(TRIPS = sum(TOTAL_TRIPS))
+
+
+```
+
+**Presenting Data with `kable`**: using the **`kable`** function to create neatly formatted tables of the first few rows of the datasets.
+
+**Saving Data with `write_rds`**: saving the filtered and summarized datasets to RDS files.
+
+**Reloading Data with `read_rds`**: After saving the datasets, reloading them to ensure that the saved files contain the correct data. This verifies the integrity of the saved files and ensures that they can be reused in following analysis without re-run the entire preprocessing pipeline.
+
+```{r}
+kable(head(origin6_9wdm))
+kable(head(origin5_8wda))
+kable(head(origin11_2hm))
+kable(head(origin4_7he))
+
+write_rds(origin6_9wdm, "data/rds/origin6_9wdm.rds")
+write_rds(origin5_8wda, "data/rds/origin5_8wda.rds")
+write_rds(origin11_2hm, "data/rds/origin11_2hm.rds")
+write_rds(origin4_7he, "data/rds/origin4_7he.rds")
+
+origin6_9wdm <- read_rds("data/rds/origin6_9wdm.rds")
+origin5_8wda <- read_rds("data/rds/origin5_8wda.rds")
+origin11_2hm <- read_rds("data/rds/origin11_2hm.rds")
+origin4_7he <- read_rds("data/rds/origin4_7he.rds")
+
+```
+
+### **Transforming Coordinate System**
+
+Read and spatially transform both bus stop and Master Plan Subzone (MPSZ) datasets to a Singapore-specific coordinate system (CRS 3414)
+
+```{r}
+busstop <- st_read(dsn = "data/geospatial",
+                   layer = "BusStop") %>%
+  st_transform(crs = 3414)
+
+glimpse(busstop)
+```
+
+```{r}
+mpsz <- st_read(dsn = "data/geospatial",
+                   layer = "MPSZ-2019") %>%
+  st_transform(crs = 3414)
+glimpse(mpsz)
+```
+
+Perform a spatial intersection to map each bus stop to its corresponding subzone. This process culminates in creating and saving a simplified dataset that links bus stops with subzones, dropping unnecessary geometric data.
+
+```{r}
+busstop_mpsz <- st_intersection(busstop, mpsz) %>%
+  select(BUS_STOP_N, SUBZONE_C) %>%
+  st_drop_geometry()
+
+write_rds(busstop_mpsz, "data/rds/busstop_mpsz.csv")  
+glimpse(busstop_mpsz)
+```
+
+#### Exploratory Data Analysis (EDA) on **`busstop_mpsz`** dataset:
+
+**Count of Bus Stops per Subzone** to reveal which areas are more heavily serviced by buses.
+
+```{r}
+busstop_counts <- busstop_mpsz %>% 
+                  group_by(SUBZONE_C) %>% 
+                  summarise(Count = n())
+head(busstop_counts)
+
+```
+
+**Map Visualization**:
+
+Since we have geographic data for subzones, we can create a map showing the distribution of bus stops. This can be particularly insightful for understanding spatial patterns.
+
+```{r}
+busstop_counts_map <- mpsz %>% 
+                      left_join(busstop_counts, by = "SUBZONE_C")
+tm_shape(busstop_counts_map) +
+  tm_borders() +
+  tm_fill(col = "Count", title = "Number of Bus Stops")
+
+```
+
+### **Geospatial Visualization (Geovisualisation)**
+
+**Hexagon Level Aggregation**:
+
+create a hexagonal grid over **`mpsz`** -spatial dataset of Master Plan Subzones, use the **`st_make_grid()`** function from the **`sf`** package to generate a grid of hexagons with specified dimensions, and then create an **`sf`** object from that grid.
+
+```{r}
+area_hexagon_grid = st_make_grid(mpsz, c(500, 500), what = "polygons", square = FALSE)
+```
+
+add ID to each hexagon:
+
+```{r}
+hexagon_grid_sf = st_sf(area_hexagon_grid) %>%
+  
+  mutate(grid_id = 1:length(lengths(area_hexagon_grid)))
+
+```
+
+intersect the hexagonal grid with the bus stops, select certain columns, and then drop the geometry for saving to an RDS file:
+
+```{r}
+busstop_hexagon <- st_intersection(hexagon_grid_sf,busstop) %>%
+  select(BUS_STOP_N, grid_id) %>%
+  st_drop_geometry()
+
+write_rds(busstop_hexagon, "data/rds/busstop_hexagon.csv")
+```
+
+check for duplicates and only retain the unique values:
+
+```{r}
+duplicate <- busstop_hexagon %>%
+  group_by_all() %>%
+  filter(n()>1) %>%
+  ungroup()
+
+busstop_hexagon <- unique(busstop_hexagon)
+```
+
+exclude NA value for each bus stops
+
+```{r}
+busstop_hexagon <- busstop_hexagon %>%
+  filter(!is.na(grid_id) & grid_id > 0)
+```
+
+Assign ID to each bus stop, exclude all the NULL and 0 values
+
+```{r}
+# Convert the ORIGIN_PT_CODE to a character type before the join
+origin11_2hm$ORIGIN_PT_CODE <- as.character(origin11_2hm$ORIGIN_PT_CODE)
+
+origin4_7he$ORIGIN_PT_CODE <- as.character(origin4_7he$ORIGIN_PT_CODE)
+
+origin5_8wda$ORIGIN_PT_CODE <- as.character(origin5_8wda$ORIGIN_PT_CODE)
+
+origin6_9wdm$ORIGIN_PT_CODE <- as.character(origin6_9wdm$ORIGIN_PT_CODE)
+
+
+```
+
+```{r}
+
+gridid11_2 <- left_join(busstop_hexagon, origin11_2hm,
+            by = c("BUS_STOP_N" = "ORIGIN_PT_CODE")) 
+
+gridi11_2 <- gridid11_2 %>%
+  filter(!is.na(TRIPS) & TRIPS > 0)
+
+
+gridid5_8 <- left_join(busstop_hexagon, origin5_8wda,
+            by = c("BUS_STOP_N" = "ORIGIN_PT_CODE")) 
+
+gridid5_8 <- gridid5_8 %>%
+  filter(!is.na(TRIPS) & TRIPS > 0)
+
+
+gridid6_9 <- left_join(busstop_hexagon, origin6_9wdm,
+            by = c("BUS_STOP_N" = "ORIGIN_PT_CODE")) 
+
+gridid6_9 <- gridid6_9 %>%
+  filter(!is.na(TRIPS) & TRIPS > 0)
+
+
+gridid4_7 <- left_join(busstop_hexagon, origin4_7he,
+            by = c("BUS_STOP_N" = "ORIGIN_PT_CODE")) 
+
+gridid4_7 <- gridid4_7 %>%
+  filter(!is.na(TRIPS) & TRIPS > 0)
+```
+
+## **Choropleth Visualisation**
+
+### **6-9am weekday peak hours**
+
+aggregate trip data by hexagonal grid IDs to calculate total trips during weekday morning 6-9:
+
+```{r}
+total_trips_by_grid <- gridid6_9 %>%
+  group_by(grid_id) %>%
+  summarise(total_trips = sum(TRIPS, na.rm = TRUE))
+```
+
+merge above with a spatial grid to create a **`sf`** object:
+
+```{r}
+total_trips_by_grid <- total_trips_by_grid %>%
+  left_join(hexagon_grid_sf, by = c("grid_id" = "grid_id"))
+
+total_trips_by_grid_sf <- st_sf(total_trips_by_grid)
+```
+
+Using **`tmap`** to construct a choropleth map:
+
+```{r}
+tmap_mode("plot")
+
+map_hex = tm_shape(total_trips_by_grid_sf) +
+  tm_fill(
+    col = "total_trips",
+    palette = "Reds",
+    style = "cont",
+    title = "Total Trips Taken - Weekday Morning Peak 6-9am",
+    id = "grid_id",
+    showNA = FALSE,
+    alpha = 0.6,
+    popup.vars = c(
+      "Number of trips: " = "total_trips"
+    ),
+    popup.format = list(
+      total_trips = list(format = "f", digits = 0)
+    )
+  ) +
+  tm_borders(col = "grey40", lwd = 0.4)
+
+map_hex
+```
+
+The choropleth map for the **6-9am weekday peak hours** elucidates the distribution of bus ridership across the city's hexagonal sectors. Deep reds indicate bustling hubs, likely business districts or transit interchanges, revealing heavy commuter influx. Lighter shades suggest residential areas with sparser ridership. This visualization is instrumental for urban planners and transit authorities, highlighting critical areas for potential service enhancement and infrastructure development.
+
+### **5pm-8pm Weekday Afternoon Peak Hours**
+
+Same methods to plot for **Weekday Afternoon Peak Hours 5pm-8pm**
+
+```{r}
+total_trips_by_grid <- gridid5_8 %>%
+  group_by(grid_id) %>%
+  summarise(total_trips = sum(TRIPS, na.rm = TRUE))
+
+total_trips_by_grid <- total_trips_by_grid %>%
+  left_join(hexagon_grid_sf, by = c("grid_id" = "grid_id"))
+
+total_trips_by_grid_sf <- st_sf(total_trips_by_grid)
+
+tmap_mode("plot")
+
+map_hex = tm_shape(total_trips_by_grid_sf) +
+  tm_fill(
+    col = "total_trips",
+    palette = "YlGnBu",
+    style = "cont",
+    title = "Total Trips Taken - Weekday Afternoon Peak 5-8pm",
+    id = "grid_id",
+    showNA = FALSE,
+    alpha = 0.6,
+    popup.vars = c(
+      "Number of trips: " = "total_trips"
+    ),
+    popup.format = list(
+      total_trips = list(format = "f", digits = 0)
+    )
+  ) +
+  tm_borders(col = "blue4", lwd = 0.4)
+
+map_hex
+
+```
+
+The **5-8 pm weekday** choropleth map captures the unique dynamics of evening commuting patterns. It vividly displays areas of heightened activity, likely representing major commercial centers and business districts where people depart from at the end of the workday. The varied shades across the hexagonal grid indicate a diverse distribution of bus ridership, with some zones experiencing higher traffic, possibly reflecting major transit routes or nodes. This map helps understand the evening dispersal patterns in urban transit, providing key insights for optimizing bus services during these peak hours. Also in identifying areas that might benefit from increased service frequency or capacity enhancements to accommodate the high volume of commuters heading home.
+
+###  **11am-2pm Weekend/Holiday Morning Peak Hours**
+
+```{r}
+total_trips_by_grid <- gridid11_2 %>%
+  group_by(grid_id) %>%
+  summarise(total_trips = sum(TRIPS, na.rm = TRUE))
+
+total_trips_by_grid <- total_trips_by_grid %>%
+  left_join(hexagon_grid_sf, by = c("grid_id" = "grid_id"))
+
+total_trips_by_grid_sf <- st_sf(total_trips_by_grid)
+
+tmap_mode("plot")
+
+map_hex = tm_shape(total_trips_by_grid_sf) +
+  tm_fill(
+    col = "total_trips",
+    palette = "YlOrRd",
+    style = "cont",
+    title = "Total Trips Taken - Weekend/Holiday Morning Peak 11am-2pm",
+    id = "grid_id",
+    showNA = FALSE,
+    alpha = 0.6,
+    popup.vars = c(
+      "Number of trips: " = "total_trips"
+    ),
+    popup.format = list(
+      total_trips = list(format = "f", digits = 0)
+    )
+  ) +
+  tm_borders(col = "blue", lwd = 0.4)
+
+map_hex
+```
+
+For the **Weekend/Holiday Morning Peak between 11am and 2pm**, the map likely illustrates a distinct pattern compared to typical weekday commuting hours. This period often encompasses leisure or shopping activities, and the map could reveal areas of high pedestrian traffic such as malls, parks, or tourist attractions. Denser areas on the map might indicate popular weekend destinations or residential areas from which people commonly venture out during these hours. Such a visualization is particularly valuable for understanding weekend mobility trends, guiding public transport adjustments to cater to non-work-related travel, and enhancing overall service quality during leisure peak times.
+
+###  **4pm-7pm Weekend/Holiday Evening Peak Hours**
+
+```{r}
+total_trips_by_grid <- gridid11_2 %>%
+  group_by(grid_id) %>%
+  summarise(total_trips = sum(TRIPS, na.rm = TRUE))
+
+total_trips_by_grid <- total_trips_by_grid %>%
+  left_join(hexagon_grid_sf, by = c("grid_id" = "grid_id"))
+
+total_trips_by_grid_sf <- st_sf(total_trips_by_grid)
+
+tmap_mode("plot")
+
+map_hex = tm_shape(total_trips_by_grid_sf) +
+  tm_fill(
+    col = "total_trips",
+    palette = "Greens",
+    style = "cont",
+    title = "Total Trips Taken - Weekend/Holiday Morning Peak 4-7pm",
+    id = "grid_id",
+    showNA = FALSE,
+    alpha = 0.6,
+    popup.vars = c(
+      "Number of trips: " = "total_trips"
+    ),
+    popup.format = list(
+      total_trips = list(format = "f", digits = 0)
+    )
+  ) +
+  tm_borders(col = "black", lwd = 0.4)
+
+map_hex
+```
+
+For the **Weekend/Holiday Evening Peak Hours from 4pm to 7pm**, the map would likely show the movement patterns as people conclude their leisure activities or return from day trips. Areas with higher activity could include shopping districts, entertainment venues, or parks, reflecting where people spend their weekend afternoons. The map might also highlight transit routes leading back to residential areas, indicating the flow of people heading home. This visualization is invaluable for transit planners to understand and respond to weekend evening travel habits, ensuring efficient and adequate transportation services during these times, and enhancing the overall weekend travel experience.

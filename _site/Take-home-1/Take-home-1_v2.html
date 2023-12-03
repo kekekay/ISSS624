@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.433">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Ke Ke">
+<meta name="dcterms.date" content="2023-11-27">
+
+<title>ISSS624 - Take Home Exercise 1a:Geovisualisation and Analysis</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">ISSS624</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-hands-on-exercises" role="button" data-bs-toggle="dropdown" aria-expanded="false" rel="" target="">
+ <span class="menu-text">Hands-on Exercises</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-hands-on-exercises">    
+        <li>
+    <a class="dropdown-item" href="../Hands-on Ex1/Hands-on_Ex1.html" rel="" target="">
+ <span class="dropdown-text">Hands-on Exercise 1</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../Hands-on_Ex2/Hands-on_2.html" rel="" target="">
+ <span class="dropdown-text">Hands-on Exercise 2</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../Hands-on_Ex3/Hands-on_Ex3.html" rel="" target="">
+ <span class="dropdown-text">Hands-on Exercise 3</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-in-class-exercises" role="button" data-bs-toggle="dropdown" aria-expanded="false" rel="" target="">
+ <span class="menu-text">In-class Exercises</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-in-class-exercises">    
+        <li>
+    <a class="dropdown-item" href="../In-class exercise 1/in-class_ex1.html" rel="" target="">
+ <span class="dropdown-text">In-class Ex1</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../In-class_2/In_class2-EHSA.html" rel="" target="">
+ <span class="dropdown-text">In-class Ex2</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../In-class_Ex3/Inclass_ex3.html" rel="" target="">
+ <span class="dropdown-text">In-class Ex3</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-take-home-exercises" role="button" data-bs-toggle="dropdown" aria-expanded="false" rel="" target="">
+ <span class="menu-text">Take Home Exercises</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-take-home-exercises">    
+        <li class="dropdown-header">Take Home Exercise 1</li>
+    </ul>
+  </li>
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../index.html" rel="" target="">
+ <span class="menu-text">Home</span></a>
+  </li>  
+  <li class="dropdown-header">
+ <span class="menu-text">KE KE's</span></li>
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">1. Overview</a>
+  <ul class="collapse">
+  <li><a href="#getting-started" id="toc-getting-started" class="nav-link" data-scroll-target="#getting-started">2 Getting Started</a></li>
+  <li><a href="#importing-geospatial-data-into-r" id="toc-importing-geospatial-data-into-r" class="nav-link" data-scroll-target="#importing-geospatial-data-into-r"><strong>Importing Geospatial data into R</strong></a></li>
+  <li><a href="#importing-attribute-data-into-r" id="toc-importing-attribute-data-into-r" class="nav-link" data-scroll-target="#importing-attribute-data-into-r"><strong>Importing attribute data into R</strong></a></li>
+  <li><a href="#filter-and-aggregate-the-origin-destination-data-odbus-for-specific-time-periods" id="toc-filter-and-aggregate-the-origin-destination-data-odbus-for-specific-time-periods" class="nav-link" data-scroll-target="#filter-and-aggregate-the-origin-destination-data-odbus-for-specific-time-periods">Filter and aggregate the origin-destination data (<code>odbus</code>) for specific time periods</a></li>
+  <li><a href="#transforming-coordinate-system" id="toc-transforming-coordinate-system" class="nav-link" data-scroll-target="#transforming-coordinate-system"><strong>Transforming Coordinate System</strong></a></li>
+  <li><a href="#geospatial-visualization-geovisualisation" id="toc-geospatial-visualization-geovisualisation" class="nav-link" data-scroll-target="#geospatial-visualization-geovisualisation"><strong>Geospatial Visualization (Geovisualisation)</strong></a></li>
+  </ul></li>
+  <li><a href="#choropleth-visualisation" id="toc-choropleth-visualisation" class="nav-link" data-scroll-target="#choropleth-visualisation"><strong>Choropleth Visualisation</strong></a>
+  <ul class="collapse">
+  <li><a href="#am-weekday-peak-hours" id="toc-am-weekday-peak-hours" class="nav-link" data-scroll-target="#am-weekday-peak-hours"><strong>6-9am weekday peak hours</strong></a></li>
+  <li><a href="#pm-8pm-weekday-afternoon-peak-hours" id="toc-pm-8pm-weekday-afternoon-peak-hours" class="nav-link" data-scroll-target="#pm-8pm-weekday-afternoon-peak-hours"><strong>5pm-8pm Weekday Afternoon Peak Hours</strong></a></li>
+  <li><a href="#am-2pm-weekendholiday-morning-peak-hours" id="toc-am-2pm-weekendholiday-morning-peak-hours" class="nav-link" data-scroll-target="#am-2pm-weekendholiday-morning-peak-hours"><strong>11am-2pm Weekend/Holiday Morning Peak Hours</strong></a></li>
+  <li><a href="#pm-7pm-weekendholiday-evening-peak-hours" id="toc-pm-7pm-weekendholiday-evening-peak-hours" class="nav-link" data-scroll-target="#pm-7pm-weekendholiday-evening-peak-hours"><strong>4pm-7pm Weekend/Holiday Evening Peak Hours</strong></a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Take Home Exercise 1a:Geovisualisation and Analysis</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Ke Ke </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">November 27, 2023</p>
+    </div>
+  </div>
+  
+    <div>
+    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">December 3, 2023</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+</header>
+
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">1. Overview</h2>
+<p>The urban public transport system generates vast amounts of spatiotemporal trajectory data daily, encompassing bus card swipes and GPS location tracking. When this data is complete and accurate, merging bus card transaction data with GPS positioning easily yields valuable information on passengers’ boarding points. This integrated data offers a comprehensive view of transit usage patterns, enhancing our understanding of urban mobility. Analyzing this rich dataset enables the identification of key trends and behaviors in public transportation usage, providing critical insights for city planners and transport authorities to optimize routes, improve service efficiency, and enhance the overall commuter experience.</p>
+<section id="getting-started" class="level3">
+<h3 class="anchored" data-anchor-id="getting-started">2 Getting Started</h3>
+<p>Below libraries will be used:</p>
+<p><strong>sf (Simple Features for R)</strong>: handling spatial data in R. It provides simple, consistent functions for working with spatial vector data (points, lines, polygons).</p>
+<p><strong>sfdep</strong>: provides an interface to 'spdep' to integrate with 'sf' objects and the 'tidyverse'. It will be used for conducting Exploratory Spatial Data Analysis.</p>
+<p><strong>tmap:</strong> provides a set of functions and tools for creating thematic maps such as choropleths&nbsp;</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, sfdep, tmap, tidyverse, knitr, dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="importing-geospatial-data-into-r" class="level3">
+<h3 class="anchored" data-anchor-id="importing-geospatial-data-into-r"><strong>Importing Geospatial data into R</strong></h3>
+<p>Firstly, we load in our data:</p>
+<ul>
+<li><em>Bus Stop Location</em> from LTA DataMall. It provides information about all the bus stops currently being serviced by buses, including the bus stop code (identifier) and location coordinates.</li>
+</ul>
+<p>The code chunk below uses&nbsp;<em>st_read()</em>&nbsp;function of&nbsp;<strong>sf</strong>&nbsp;package to import&nbsp;<code>BusStop</code>&nbsp;shape file into R as a polygon feature data frame. The imported shape file will be a&nbsp;<strong>simple features</strong>&nbsp;object of&nbsp;<strong>sf</strong>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getwd</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "C:/kekekay/ISSS624/Take-home-1"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>busstop <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"Data/geospatial"</span>,<span class="at">layer =</span> <span class="st">"BusStop"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `BusStop' from data source 
+  `C:\kekekay\ISSS624\Take-home-1\Data\geospatial' using driver `ESRI Shapefile'
+Simple feature collection with 5161 features and 3 fields
+Geometry type: POINT
+Dimension:     XY
+Bounding box:  xmin: 3970.122 ymin: 26482.1 xmax: 48284.56 ymax: 52983.82
+Projected CRS: SVY21</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(busstop)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 5,161
+Columns: 4
+$ BUS_STOP_N &lt;chr&gt; "22069", "32071", "44331", "96081", "11561", "66191", "2338…
+$ BUS_ROOF_N &lt;chr&gt; "B06", "B23", "B01", "B05", "B05", "B03", "B02A", "B02", "B…
+$ LOC_DESC   &lt;chr&gt; "OPP CEVA LOGISTICS", "AFT TRACK 13", "BLK 239", "GRACE IND…
+$ geometry   &lt;POINT [m]&gt; POINT (13576.31 32883.65), POINT (13228.59 44206.38),…</code></pre>
+</div>
+</div>
+<p>From the result, we can see there are total 5161 multipolygons features with 3 fields in <code>busstop.</code></p>
+<p>Checking for missing values in bus stop data:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(busstop))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 9</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(busstop, <span class="cf">function</span>(x) <span class="fu">sum</span>(<span class="fu">is.na</span>(x)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>BUS_STOP_N BUS_ROOF_N   LOC_DESC   geometry 
+         0          1          8          0 </code></pre>
+</div>
+</div>
+<p>There are total 9 missing value and let’s take a further look to decide whether to drop it:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filtering rows with missing values in BUS_ROOF_N</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>missing_bus_roof_n <span class="ot">&lt;-</span> busstop <span class="sc">%&gt;%</span> </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">filter</span>(<span class="fu">is.na</span>(BUS_ROOF_N))</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Viewing the rows with missing BUS_ROOF_N</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(missing_bus_roof_n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 1 feature and 3 fields
+Geometry type: POINT
+Dimension:     XY
+Bounding box:  xmin: 42187.23 ymin: 34995.78 xmax: 42187.23 ymax: 34995.78
+Projected CRS: SVY21
+  BUS_STOP_N BUS_ROOF_N        LOC_DESC                  geometry
+1      96319       &lt;NA&gt; Yusen Logistics POINT (42187.23 34995.78)</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filtering rows with missing values in LOC_DESC</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>missing_loc_desc <span class="ot">&lt;-</span> busstop <span class="sc">%&gt;%</span> </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">filter</span>(<span class="fu">is.na</span>(LOC_DESC))</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Viewing the rows with missing LOC_DESC</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(missing_loc_desc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Simple feature collection with 6 features and 3 fields
+Geometry type: POINT
+Dimension:     XY
+Bounding box:  xmin: 22616.75 ymin: 28664.55 xmax: 30305.32 ymax: 47793.68
+Projected CRS: SVY21
+  BUS_STOP_N BUS_ROOF_N LOC_DESC                  geometry
+1      47201        UNK     &lt;NA&gt; POINT (22616.75 47793.68)
+2      06029        B06     &lt;NA&gt; POINT (28602.95 29334.55)
+3      03569        B04     &lt;NA&gt; POINT (30277.55 28664.55)
+4      03561        B03     &lt;NA&gt; POINT (30305.32 28673.52)
+5      06011        B01     &lt;NA&gt; POINT (28634.37 29240.45)
+6      05069       B09A     &lt;NA&gt; POINT (28770.39 29184.57)</code></pre>
+</div>
+</div>
+<p>Since this analysis is argely geographical (e.g., mapping bus stop locations), missing values in BUS_ROOF_N and LOC_DESC may not significantly impact the results, as the key geometrical data (coordinates of bus stops) is intact.</p>
+</section>
+<section id="importing-attribute-data-into-r" class="level3">
+<h3 class="anchored" data-anchor-id="importing-attribute-data-into-r"><strong>Importing attribute data into R</strong></h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>odbus <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/aspatial/origin_destination_bus_202310.csv"</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(odbus)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 5,694,297
+Columns: 7
+$ YEAR_MONTH          &lt;chr&gt; "2023-10", "2023-10", "2023-10", "2023-10", "2023-…
+$ DAY_TYPE            &lt;chr&gt; "WEEKENDS/HOLIDAY", "WEEKDAY", "WEEKENDS/HOLIDAY",…
+$ TIME_PER_HOUR       &lt;int&gt; 16, 16, 14, 14, 17, 17, 17, 7, 14, 14, 10, 20, 20,…
+$ PT_TYPE             &lt;chr&gt; "BUS", "BUS", "BUS", "BUS", "BUS", "BUS", "BUS", "…
+$ ORIGIN_PT_CODE      &lt;int&gt; 4168, 4168, 80119, 80119, 44069, 20281, 20281, 190…
+$ DESTINATION_PT_CODE &lt;int&gt; 10051, 10051, 90079, 90079, 17229, 20141, 20141, 1…
+$ TOTAL_TRIPS         &lt;int&gt; 3, 5, 3, 5, 4, 1, 24, 2, 1, 7, 3, 2, 5, 1, 1, 1, 1…</code></pre>
+</div>
+</div>
+<p>Checking for missing values:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(odbus))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<p>there is no missing value and proceed to view the rows in <em>odbus:</em></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(odbus)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  YEAR_MONTH         DAY_TYPE TIME_PER_HOUR PT_TYPE ORIGIN_PT_CODE
+1    2023-10 WEEKENDS/HOLIDAY            16     BUS           4168
+2    2023-10          WEEKDAY            16     BUS           4168
+3    2023-10 WEEKENDS/HOLIDAY            14     BUS          80119
+4    2023-10          WEEKDAY            14     BUS          80119
+5    2023-10          WEEKDAY            17     BUS          44069
+6    2023-10 WEEKENDS/HOLIDAY            17     BUS          20281
+  DESTINATION_PT_CODE TOTAL_TRIPS
+1               10051           3
+2               10051           5
+3               90079           3
+4               90079           5
+5               17229           4
+6               20141           1</code></pre>
+</div>
+</div>
+<p>the <strong><code>ORIGIN_PT_CODE</code></strong> and <strong><code>DESTINATION_PT_CODE</code></strong> columns represent categorical data rather than numerical values. In R, factors are used to handle categorical variables which are stored as levels.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Convert the 2 columns to factors </span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>odbus<span class="sc">$</span>ORIGIN_PT_CODE <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(odbus<span class="sc">$</span>ORIGIN_PT_CODE)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>odbus<span class="sc">$</span>DESTINATION_PT_CODE <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(odbus<span class="sc">$</span>DESTINATION_PT_CODE) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="filter-and-aggregate-the-origin-destination-data-odbus-for-specific-time-periods" class="level3">
+<h3 class="anchored" data-anchor-id="filter-and-aggregate-the-origin-destination-data-odbus-for-specific-time-periods">Filter and aggregate the origin-destination data (<code>odbus</code>) for specific time periods</h3>
+<p>A summarized view of trip data for specific time periods, which can be very useful for understanding travel patterns during peak hours.</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Peak hour period</th>
+<th>Bus tap on time</th>
+<th>Data name</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Weekday morning peak</td>
+<td>6am to 9am</td>
+<td><em>origin6_9wdm</em></td>
+</tr>
+<tr class="even">
+<td>Weekday afternoon peak</td>
+<td>5pm to 8pm</td>
+<td><em>origin5_8wda</em></td>
+</tr>
+<tr class="odd">
+<td>Weekend/holiday morning peak</td>
+<td>11am to 2pm</td>
+<td><em>origin11_2hm</em></td>
+</tr>
+<tr class="even">
+<td>Weekend/holiday evening peak</td>
+<td>4pm to 7pm</td>
+<td><em>origin4_7he</em></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>origin6_9wdm <span class="ot">&lt;-</span> odbus <span class="sc">%&gt;%</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(DAY_TYPE <span class="sc">==</span> <span class="st">"WEEKDAY"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(TIME_PER_HOUR <span class="sc">&gt;=</span> <span class="dv">6</span> <span class="sc">&amp;</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>           TIME_PER_HOUR <span class="sc">&lt;=</span> <span class="dv">9</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(ORIGIN_PT_CODE) <span class="sc">%&gt;%</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">TRIPS =</span> <span class="fu">sum</span>(TOTAL_TRIPS))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>origin5_8wda <span class="ot">&lt;-</span> odbus <span class="sc">%&gt;%</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(DAY_TYPE <span class="sc">==</span> <span class="st">"WEEKDAY"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(TIME_PER_HOUR <span class="sc">&gt;=</span> <span class="dv">17</span> <span class="sc">&amp;</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>           TIME_PER_HOUR <span class="sc">&lt;=</span> <span class="dv">20</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(ORIGIN_PT_CODE) <span class="sc">%&gt;%</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">TRIPS =</span> <span class="fu">sum</span>(TOTAL_TRIPS))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>origin11_2hm <span class="ot">&lt;-</span> odbus <span class="sc">%&gt;%</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(DAY_TYPE <span class="sc">==</span> <span class="st">"WEEKENDS/HOLIDAY"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(TIME_PER_HOUR <span class="sc">&gt;=</span> <span class="dv">11</span> <span class="sc">&amp;</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>           TIME_PER_HOUR <span class="sc">&lt;=</span> <span class="dv">14</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(ORIGIN_PT_CODE) <span class="sc">%&gt;%</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">TRIPS =</span> <span class="fu">sum</span>(TOTAL_TRIPS))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>origin4_7he <span class="ot">&lt;-</span> odbus <span class="sc">%&gt;%</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(DAY_TYPE <span class="sc">==</span> <span class="st">"WEEKENDS/HOLIDAY"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(TIME_PER_HOUR <span class="sc">&gt;=</span> <span class="dv">16</span> <span class="sc">&amp;</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>           TIME_PER_HOUR <span class="sc">&lt;=</span> <span class="dv">19</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(ORIGIN_PT_CODE) <span class="sc">%&gt;%</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">TRIPS =</span> <span class="fu">sum</span>(TOTAL_TRIPS))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Presenting Data with <code>kable</code></strong>: using the <strong><code>kable</code></strong> function to create neatly formatted tables of the first few rows of the datasets.</p>
+<p><strong>Saving Data with <code>write_rds</code></strong>: saving the filtered and summarized datasets to RDS files.</p>
+<p><strong>Reloading Data with <code>read_rds</code></strong>: After saving the datasets, reloading them to ensure that the saved files contain the correct data. This verifies the integrity of the saved files and ensures that they can be reused in following analysis without re-run the entire preprocessing pipeline.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">head</span>(origin6_9wdm))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">ORIGIN_PT_CODE</th>
+<th style="text-align: right;">TRIPS</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1012</td>
+<td style="text-align: right;">1770</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1013</td>
+<td style="text-align: right;">841</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1019</td>
+<td style="text-align: right;">1530</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1029</td>
+<td style="text-align: right;">2483</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1039</td>
+<td style="text-align: right;">2919</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1059</td>
+<td style="text-align: right;">1734</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">head</span>(origin5_8wda))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">ORIGIN_PT_CODE</th>
+<th style="text-align: right;">TRIPS</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1012</td>
+<td style="text-align: right;">8000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1013</td>
+<td style="text-align: right;">7038</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1019</td>
+<td style="text-align: right;">3398</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1029</td>
+<td style="text-align: right;">9089</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1039</td>
+<td style="text-align: right;">12095</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1059</td>
+<td style="text-align: right;">2212</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">head</span>(origin11_2hm))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">ORIGIN_PT_CODE</th>
+<th style="text-align: right;">TRIPS</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1012</td>
+<td style="text-align: right;">2177</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1013</td>
+<td style="text-align: right;">1818</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1019</td>
+<td style="text-align: right;">1536</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1029</td>
+<td style="text-align: right;">3217</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1039</td>
+<td style="text-align: right;">5408</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1059</td>
+<td style="text-align: right;">1159</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">head</span>(origin4_7he))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">ORIGIN_PT_CODE</th>
+<th style="text-align: right;">TRIPS</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1012</td>
+<td style="text-align: right;">3061</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1013</td>
+<td style="text-align: right;">2770</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1019</td>
+<td style="text-align: right;">1685</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1029</td>
+<td style="text-align: right;">4063</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1039</td>
+<td style="text-align: right;">7263</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1059</td>
+<td style="text-align: right;">1118</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(origin6_9wdm, <span class="st">"data/rds/origin6_9wdm.rds"</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(origin5_8wda, <span class="st">"data/rds/origin5_8wda.rds"</span>)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(origin11_2hm, <span class="st">"data/rds/origin11_2hm.rds"</span>)</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(origin4_7he, <span class="st">"data/rds/origin4_7he.rds"</span>)</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>origin6_9wdm <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">"data/rds/origin6_9wdm.rds"</span>)</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>origin5_8wda <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">"data/rds/origin5_8wda.rds"</span>)</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>origin11_2hm <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">"data/rds/origin11_2hm.rds"</span>)</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>origin4_7he <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">"data/rds/origin4_7he.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="transforming-coordinate-system" class="level3">
+<h3 class="anchored" data-anchor-id="transforming-coordinate-system"><strong>Transforming Coordinate System</strong></h3>
+<p>Read and spatially transform both bus stop and Master Plan Subzone (MPSZ) datasets to a Singapore-specific coordinate system (CRS 3414)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>busstop <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/geospatial"</span>,</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>                   <span class="at">layer =</span> <span class="st">"BusStop"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">3414</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `BusStop' from data source 
+  `C:\kekekay\ISSS624\Take-home-1\Data\geospatial' using driver `ESRI Shapefile'
+Simple feature collection with 5161 features and 3 fields
+Geometry type: POINT
+Dimension:     XY
+Bounding box:  xmin: 3970.122 ymin: 26482.1 xmax: 48284.56 ymax: 52983.82
+Projected CRS: SVY21</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(busstop)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 5,161
+Columns: 4
+$ BUS_STOP_N &lt;chr&gt; "22069", "32071", "44331", "96081", "11561", "66191", "2338…
+$ BUS_ROOF_N &lt;chr&gt; "B06", "B23", "B01", "B05", "B05", "B03", "B02A", "B02", "B…
+$ LOC_DESC   &lt;chr&gt; "OPP CEVA LOGISTICS", "AFT TRACK 13", "BLK 239", "GRACE IND…
+$ geometry   &lt;POINT [m]&gt; POINT (13576.31 32883.65), POINT (13228.59 44206.38),…</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>mpsz <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/geospatial"</span>,</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>                   <span class="at">layer =</span> <span class="st">"MPSZ-2019"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">3414</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `MPSZ-2019' from data source 
+  `C:\kekekay\ISSS624\Take-home-1\Data\geospatial' using driver `ESRI Shapefile'
+Simple feature collection with 332 features and 6 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 103.6057 ymin: 1.158699 xmax: 104.0885 ymax: 1.470775
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(mpsz)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 332
+Columns: 7
+$ SUBZONE_N  &lt;chr&gt; "MARINA EAST", "INSTITUTION HILL", "ROBERTSON QUAY", "JURON…
+$ SUBZONE_C  &lt;chr&gt; "MESZ01", "RVSZ05", "SRSZ01", "WISZ01", "MUSZ02", "MPSZ05",…
+$ PLN_AREA_N &lt;chr&gt; "MARINA EAST", "RIVER VALLEY", "SINGAPORE RIVER", "WESTERN …
+$ PLN_AREA_C &lt;chr&gt; "ME", "RV", "SR", "WI", "MU", "MP", "WI", "WI", "SI", "SI",…
+$ REGION_N   &lt;chr&gt; "CENTRAL REGION", "CENTRAL REGION", "CENTRAL REGION", "WEST…
+$ REGION_C   &lt;chr&gt; "CR", "CR", "CR", "WR", "CR", "CR", "WR", "WR", "CR", "CR",…
+$ geometry   &lt;MULTIPOLYGON [m]&gt; MULTIPOLYGON (((33222.98 29..., MULTIPOLYGON (…</code></pre>
+</div>
+</div>
+<p>Perform a spatial intersection to map each bus stop to its corresponding subzone. This process culminates in creating and saving a simplified dataset that links bus stops with subzones, dropping unnecessary geometric data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>busstop_mpsz <span class="ot">&lt;-</span> <span class="fu">st_intersection</span>(busstop, mpsz) <span class="sc">%&gt;%</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(BUS_STOP_N, SUBZONE_C) <span class="sc">%&gt;%</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>()</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(busstop_mpsz, <span class="st">"data/rds/busstop_mpsz.csv"</span>)  </span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(busstop_mpsz)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 5,156
+Columns: 2
+$ BUS_STOP_N &lt;chr&gt; "13099", "13089", "06151", "13211", "13139", "13109", "1311…
+$ SUBZONE_C  &lt;chr&gt; "RVSZ05", "RVSZ05", "SRSZ01", "SRSZ01", "SRSZ01", "SRSZ01",…</code></pre>
+</div>
+</div>
+<section id="exploratory-data-analysis-eda-on-busstop_mpsz-dataset" class="level4">
+<h4 class="anchored" data-anchor-id="exploratory-data-analysis-eda-on-busstop_mpsz-dataset">Exploratory Data Analysis (EDA) on <strong><code>busstop_mpsz</code></strong> dataset:</h4>
+<p><strong>Count of Bus Stops per Subzone</strong> to reveal which areas are more heavily serviced by buses.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>busstop_counts <span class="ot">&lt;-</span> busstop_mpsz <span class="sc">%&gt;%</span> </span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">group_by</span>(SUBZONE_C) <span class="sc">%&gt;%</span> </span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">summarise</span>(<span class="at">Count =</span> <span class="fu">n</span>())</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(busstop_counts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 2
+  SUBZONE_C Count
+  &lt;chr&gt;     &lt;int&gt;
+1 AMSZ01        8
+2 AMSZ02       21
+3 AMSZ03       15
+4 AMSZ04        9
+5 AMSZ05       12
+6 AMSZ06       16</code></pre>
+</div>
+</div>
+<p><strong>Map Visualization</strong>:</p>
+<p>Since we have geographic data for subzones, we can create a map showing the distribution of bus stops. This can be particularly insightful for understanding spatial patterns.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>busstop_counts_map <span class="ot">&lt;-</span> mpsz <span class="sc">%&gt;%</span> </span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">left_join</span>(busstop_counts, <span class="at">by =</span> <span class="st">"SUBZONE_C"</span>)</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(busstop_counts_map) <span class="sc">+</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>() <span class="sc">+</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(<span class="at">col =</span> <span class="st">"Count"</span>, <span class="at">title =</span> <span class="st">"Number of Bus Stops"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home-1_v2_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="geospatial-visualization-geovisualisation" class="level3">
+<h3 class="anchored" data-anchor-id="geospatial-visualization-geovisualisation"><strong>Geospatial Visualization (Geovisualisation)</strong></h3>
+<p><strong>Hexagon Level Aggregation</strong>:</p>
+<p>create a hexagonal grid over <strong><code>mpsz</code></strong> -spatial dataset of Master Plan Subzones, use the <strong><code>st_make_grid()</code></strong> function from the <strong><code>sf</code></strong> package to generate a grid of hexagons with specified dimensions, and then create an <strong><code>sf</code></strong> object from that grid.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>area_hexagon_grid <span class="ot">=</span> <span class="fu">st_make_grid</span>(mpsz, <span class="fu">c</span>(<span class="dv">500</span>, <span class="dv">500</span>), <span class="at">what =</span> <span class="st">"polygons"</span>, <span class="at">square =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>add ID to each hexagon:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>hexagon_grid_sf <span class="ot">=</span> <span class="fu">st_sf</span>(area_hexagon_grid) <span class="sc">%&gt;%</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">grid_id =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(<span class="fu">lengths</span>(area_hexagon_grid)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>intersect the hexagonal grid with the bus stops, select certain columns, and then drop the geometry for saving to an RDS file:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>busstop_hexagon <span class="ot">&lt;-</span> <span class="fu">st_intersection</span>(hexagon_grid_sf,busstop) <span class="sc">%&gt;%</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(BUS_STOP_N, grid_id) <span class="sc">%&gt;%</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>()</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(busstop_hexagon, <span class="st">"data/rds/busstop_hexagon.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>check for duplicates and only retain the unique values:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>duplicate <span class="ot">&lt;-</span> busstop_hexagon <span class="sc">%&gt;%</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by_all</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">n</span>()<span class="sc">&gt;</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>busstop_hexagon <span class="ot">&lt;-</span> <span class="fu">unique</span>(busstop_hexagon)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>exclude NA value for each bus stops</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>busstop_hexagon <span class="ot">&lt;-</span> busstop_hexagon <span class="sc">%&gt;%</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(grid_id) <span class="sc">&amp;</span> grid_id <span class="sc">&gt;</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Assign ID to each bus stop, exclude all the NULL and 0 values</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert the ORIGIN_PT_CODE to a character type before the join</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>origin11_2hm<span class="sc">$</span>ORIGIN_PT_CODE <span class="ot">&lt;-</span> <span class="fu">as.character</span>(origin11_2hm<span class="sc">$</span>ORIGIN_PT_CODE)</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>origin4_7he<span class="sc">$</span>ORIGIN_PT_CODE <span class="ot">&lt;-</span> <span class="fu">as.character</span>(origin4_7he<span class="sc">$</span>ORIGIN_PT_CODE)</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>origin5_8wda<span class="sc">$</span>ORIGIN_PT_CODE <span class="ot">&lt;-</span> <span class="fu">as.character</span>(origin5_8wda<span class="sc">$</span>ORIGIN_PT_CODE)</span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>origin6_9wdm<span class="sc">$</span>ORIGIN_PT_CODE <span class="ot">&lt;-</span> <span class="fu">as.character</span>(origin6_9wdm<span class="sc">$</span>ORIGIN_PT_CODE)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>gridid11_2 <span class="ot">&lt;-</span> <span class="fu">left_join</span>(busstop_hexagon, origin11_2hm,</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"BUS_STOP_N"</span> <span class="ot">=</span> <span class="st">"ORIGIN_PT_CODE"</span>)) </span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>gridi11_2 <span class="ot">&lt;-</span> gridid11_2 <span class="sc">%&gt;%</span></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(TRIPS) <span class="sc">&amp;</span> TRIPS <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>gridid5_8 <span class="ot">&lt;-</span> <span class="fu">left_join</span>(busstop_hexagon, origin5_8wda,</span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"BUS_STOP_N"</span> <span class="ot">=</span> <span class="st">"ORIGIN_PT_CODE"</span>)) </span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>gridid5_8 <span class="ot">&lt;-</span> gridid5_8 <span class="sc">%&gt;%</span></span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(TRIPS) <span class="sc">&amp;</span> TRIPS <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-15"><a href="#cb51-15" aria-hidden="true" tabindex="-1"></a>gridid6_9 <span class="ot">&lt;-</span> <span class="fu">left_join</span>(busstop_hexagon, origin6_9wdm,</span>
+<span id="cb51-16"><a href="#cb51-16" aria-hidden="true" tabindex="-1"></a>            <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"BUS_STOP_N"</span> <span class="ot">=</span> <span class="st">"ORIGIN_PT_CODE"</span>)) </span>
+<span id="cb51-17"><a href="#cb51-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-18"><a href="#cb51-18" aria-hidden="true" tabindex="-1"></a>gridid6_9 <span class="ot">&lt;-</span> gridid6_9 <span class="sc">%&gt;%</span></span>
+<span id="cb51-19"><a href="#cb51-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(TRIPS) <span class="sc">&amp;</span> TRIPS <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb51-20"><a href="#cb51-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-21"><a href="#cb51-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-22"><a href="#cb51-22" aria-hidden="true" tabindex="-1"></a>gridid4_7 <span class="ot">&lt;-</span> <span class="fu">left_join</span>(busstop_hexagon, origin4_7he,</span>
+<span id="cb51-23"><a href="#cb51-23" aria-hidden="true" tabindex="-1"></a>            <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"BUS_STOP_N"</span> <span class="ot">=</span> <span class="st">"ORIGIN_PT_CODE"</span>)) </span>
+<span id="cb51-24"><a href="#cb51-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-25"><a href="#cb51-25" aria-hidden="true" tabindex="-1"></a>gridid4_7 <span class="ot">&lt;-</span> gridid4_7 <span class="sc">%&gt;%</span></span>
+<span id="cb51-26"><a href="#cb51-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(TRIPS) <span class="sc">&amp;</span> TRIPS <span class="sc">&gt;</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="choropleth-visualisation" class="level2">
+<h2 class="anchored" data-anchor-id="choropleth-visualisation"><strong>Choropleth Visualisation</strong></h2>
+<section id="am-weekday-peak-hours" class="level3">
+<h3 class="anchored" data-anchor-id="am-weekday-peak-hours"><strong>6-9am weekday peak hours</strong></h3>
+<p>aggregate trip data by hexagonal grid IDs to calculate total trips during weekday morning 6-9:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>total_trips_by_grid <span class="ot">&lt;-</span> gridid6_9 <span class="sc">%&gt;%</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(grid_id) <span class="sc">%&gt;%</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total_trips =</span> <span class="fu">sum</span>(TRIPS, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>merge above with a spatial grid to create a <strong><code>sf</code></strong> object:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>total_trips_by_grid <span class="ot">&lt;-</span> total_trips_by_grid <span class="sc">%&gt;%</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(hexagon_grid_sf, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"grid_id"</span> <span class="ot">=</span> <span class="st">"grid_id"</span>))</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>total_trips_by_grid_sf <span class="ot">&lt;-</span> <span class="fu">st_sf</span>(total_trips_by_grid)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Using <strong><code>tmap</code></strong> to construct a choropleth map:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>map_hex <span class="ot">=</span> <span class="fu">tm_shape</span>(total_trips_by_grid_sf) <span class="sc">+</span></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(</span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">col =</span> <span class="st">"total_trips"</span>,</span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">palette =</span> <span class="st">"Reds"</span>,</span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">style =</span> <span class="st">"cont"</span>,</span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Total Trips Taken - Weekday Morning Peak 6-9am"</span>,</span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> <span class="st">"grid_id"</span>,</span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">showNA =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.6</span>,</span>
+<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">popup.vars =</span> <span class="fu">c</span>(</span>
+<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Number of trips: "</span> <span class="ot">=</span> <span class="st">"total_trips"</span></span>
+<span id="cb54-14"><a href="#cb54-14" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb54-15"><a href="#cb54-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">popup.format =</span> <span class="fu">list</span>(</span>
+<span id="cb54-16"><a href="#cb54-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">total_trips =</span> <span class="fu">list</span>(<span class="at">format =</span> <span class="st">"f"</span>, <span class="at">digits =</span> <span class="dv">0</span>)</span>
+<span id="cb54-17"><a href="#cb54-17" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb54-18"><a href="#cb54-18" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb54-19"><a href="#cb54-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">col =</span> <span class="st">"grey40"</span>, <span class="at">lwd =</span> <span class="fl">0.4</span>)</span>
+<span id="cb54-20"><a href="#cb54-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-21"><a href="#cb54-21" aria-hidden="true" tabindex="-1"></a>map_hex</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home-1_v2_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The choropleth map for the <strong>6-9am weekday peak hours</strong> elucidates the distribution of bus ridership across the city’s hexagonal sectors. Deep reds indicate bustling hubs, likely business districts or transit interchanges, revealing heavy commuter influx. Lighter shades suggest residential areas with sparser ridership. This visualization is instrumental for urban planners and transit authorities, highlighting critical areas for potential service enhancement and infrastructure development.</p>
+</section>
+<section id="pm-8pm-weekday-afternoon-peak-hours" class="level3">
+<h3 class="anchored" data-anchor-id="pm-8pm-weekday-afternoon-peak-hours"><strong>5pm-8pm Weekday Afternoon Peak Hours</strong></h3>
+<p>Same methods to plot for <strong>Weekday Afternoon Peak Hours 5pm-8pm</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>total_trips_by_grid <span class="ot">&lt;-</span> gridid5_8 <span class="sc">%&gt;%</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(grid_id) <span class="sc">%&gt;%</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total_trips =</span> <span class="fu">sum</span>(TRIPS, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>total_trips_by_grid <span class="ot">&lt;-</span> total_trips_by_grid <span class="sc">%&gt;%</span></span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(hexagon_grid_sf, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"grid_id"</span> <span class="ot">=</span> <span class="st">"grid_id"</span>))</span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a>total_trips_by_grid_sf <span class="ot">&lt;-</span> <span class="fu">st_sf</span>(total_trips_by_grid)</span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
+<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a>map_hex <span class="ot">=</span> <span class="fu">tm_shape</span>(total_trips_by_grid_sf) <span class="sc">+</span></span>
+<span id="cb55-13"><a href="#cb55-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(</span>
+<span id="cb55-14"><a href="#cb55-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">col =</span> <span class="st">"total_trips"</span>,</span>
+<span id="cb55-15"><a href="#cb55-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">palette =</span> <span class="st">"YlGnBu"</span>,</span>
+<span id="cb55-16"><a href="#cb55-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">style =</span> <span class="st">"cont"</span>,</span>
+<span id="cb55-17"><a href="#cb55-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Total Trips Taken - Weekday Afternoon Peak 5-8pm"</span>,</span>
+<span id="cb55-18"><a href="#cb55-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> <span class="st">"grid_id"</span>,</span>
+<span id="cb55-19"><a href="#cb55-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">showNA =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb55-20"><a href="#cb55-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.6</span>,</span>
+<span id="cb55-21"><a href="#cb55-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">popup.vars =</span> <span class="fu">c</span>(</span>
+<span id="cb55-22"><a href="#cb55-22" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Number of trips: "</span> <span class="ot">=</span> <span class="st">"total_trips"</span></span>
+<span id="cb55-23"><a href="#cb55-23" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb55-24"><a href="#cb55-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">popup.format =</span> <span class="fu">list</span>(</span>
+<span id="cb55-25"><a href="#cb55-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">total_trips =</span> <span class="fu">list</span>(<span class="at">format =</span> <span class="st">"f"</span>, <span class="at">digits =</span> <span class="dv">0</span>)</span>
+<span id="cb55-26"><a href="#cb55-26" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb55-27"><a href="#cb55-27" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb55-28"><a href="#cb55-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">col =</span> <span class="st">"blue4"</span>, <span class="at">lwd =</span> <span class="fl">0.4</span>)</span>
+<span id="cb55-29"><a href="#cb55-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-30"><a href="#cb55-30" aria-hidden="true" tabindex="-1"></a>map_hex</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home-1_v2_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The <strong>5-8 pm weekday</strong> choropleth map captures the unique dynamics of evening commuting patterns. It vividly displays areas of heightened activity, likely representing major commercial centers and business districts where people depart from at the end of the workday. The varied shades across the hexagonal grid indicate a diverse distribution of bus ridership, with some zones experiencing higher traffic, possibly reflecting major transit routes or nodes. This map helps understand the evening dispersal patterns in urban transit, providing key insights for optimizing bus services during these peak hours. Also in identifying areas that might benefit from increased service frequency or capacity enhancements to accommodate the high volume of commuters heading home.</p>
+</section>
+<section id="am-2pm-weekendholiday-morning-peak-hours" class="level3">
+<h3 class="anchored" data-anchor-id="am-2pm-weekendholiday-morning-peak-hours"><strong>11am-2pm Weekend/Holiday Morning Peak Hours</strong></h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>total_trips_by_grid <span class="ot">&lt;-</span> gridid11_2 <span class="sc">%&gt;%</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(grid_id) <span class="sc">%&gt;%</span></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total_trips =</span> <span class="fu">sum</span>(TRIPS, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>total_trips_by_grid <span class="ot">&lt;-</span> total_trips_by_grid <span class="sc">%&gt;%</span></span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(hexagon_grid_sf, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"grid_id"</span> <span class="ot">=</span> <span class="st">"grid_id"</span>))</span>
+<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a>total_trips_by_grid_sf <span class="ot">&lt;-</span> <span class="fu">st_sf</span>(total_trips_by_grid)</span>
+<span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-10"><a href="#cb56-10" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
+<span id="cb56-11"><a href="#cb56-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-12"><a href="#cb56-12" aria-hidden="true" tabindex="-1"></a>map_hex <span class="ot">=</span> <span class="fu">tm_shape</span>(total_trips_by_grid_sf) <span class="sc">+</span></span>
+<span id="cb56-13"><a href="#cb56-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(</span>
+<span id="cb56-14"><a href="#cb56-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">col =</span> <span class="st">"total_trips"</span>,</span>
+<span id="cb56-15"><a href="#cb56-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">palette =</span> <span class="st">"YlOrRd"</span>,</span>
+<span id="cb56-16"><a href="#cb56-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">style =</span> <span class="st">"cont"</span>,</span>
+<span id="cb56-17"><a href="#cb56-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Total Trips Taken - Weekend/Holiday Morning Peak 11am-2pm"</span>,</span>
+<span id="cb56-18"><a href="#cb56-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> <span class="st">"grid_id"</span>,</span>
+<span id="cb56-19"><a href="#cb56-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">showNA =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb56-20"><a href="#cb56-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.6</span>,</span>
+<span id="cb56-21"><a href="#cb56-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">popup.vars =</span> <span class="fu">c</span>(</span>
+<span id="cb56-22"><a href="#cb56-22" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Number of trips: "</span> <span class="ot">=</span> <span class="st">"total_trips"</span></span>
+<span id="cb56-23"><a href="#cb56-23" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb56-24"><a href="#cb56-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">popup.format =</span> <span class="fu">list</span>(</span>
+<span id="cb56-25"><a href="#cb56-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">total_trips =</span> <span class="fu">list</span>(<span class="at">format =</span> <span class="st">"f"</span>, <span class="at">digits =</span> <span class="dv">0</span>)</span>
+<span id="cb56-26"><a href="#cb56-26" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb56-27"><a href="#cb56-27" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb56-28"><a href="#cb56-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">col =</span> <span class="st">"blue"</span>, <span class="at">lwd =</span> <span class="fl">0.4</span>)</span>
+<span id="cb56-29"><a href="#cb56-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-30"><a href="#cb56-30" aria-hidden="true" tabindex="-1"></a>map_hex</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home-1_v2_files/figure-html/unnamed-chunk-30-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>For the <strong>Weekend/Holiday Morning Peak between 11am and 2pm</strong>, the map likely illustrates a distinct pattern compared to typical weekday commuting hours. This period often encompasses leisure or shopping activities, and the map could reveal areas of high pedestrian traffic such as malls, parks, or tourist attractions. Denser areas on the map might indicate popular weekend destinations or residential areas from which people commonly venture out during these hours. Such a visualization is particularly valuable for understanding weekend mobility trends, guiding public transport adjustments to cater to non-work-related travel, and enhancing overall service quality during leisure peak times.</p>
+</section>
+<section id="pm-7pm-weekendholiday-evening-peak-hours" class="level3">
+<h3 class="anchored" data-anchor-id="pm-7pm-weekendholiday-evening-peak-hours"><strong>4pm-7pm Weekend/Holiday Evening Peak Hours</strong></h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>total_trips_by_grid <span class="ot">&lt;-</span> gridid11_2 <span class="sc">%&gt;%</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(grid_id) <span class="sc">%&gt;%</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">total_trips =</span> <span class="fu">sum</span>(TRIPS, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>total_trips_by_grid <span class="ot">&lt;-</span> total_trips_by_grid <span class="sc">%&gt;%</span></span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(hexagon_grid_sf, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"grid_id"</span> <span class="ot">=</span> <span class="st">"grid_id"</span>))</span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>total_trips_by_grid_sf <span class="ot">&lt;-</span> <span class="fu">st_sf</span>(total_trips_by_grid)</span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a>map_hex <span class="ot">=</span> <span class="fu">tm_shape</span>(total_trips_by_grid_sf) <span class="sc">+</span></span>
+<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(</span>
+<span id="cb57-14"><a href="#cb57-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">col =</span> <span class="st">"total_trips"</span>,</span>
+<span id="cb57-15"><a href="#cb57-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">palette =</span> <span class="st">"Greens"</span>,</span>
+<span id="cb57-16"><a href="#cb57-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">style =</span> <span class="st">"cont"</span>,</span>
+<span id="cb57-17"><a href="#cb57-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Total Trips Taken - Weekend/Holiday Morning Peak 4-7pm"</span>,</span>
+<span id="cb57-18"><a href="#cb57-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> <span class="st">"grid_id"</span>,</span>
+<span id="cb57-19"><a href="#cb57-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">showNA =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb57-20"><a href="#cb57-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">alpha =</span> <span class="fl">0.6</span>,</span>
+<span id="cb57-21"><a href="#cb57-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">popup.vars =</span> <span class="fu">c</span>(</span>
+<span id="cb57-22"><a href="#cb57-22" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Number of trips: "</span> <span class="ot">=</span> <span class="st">"total_trips"</span></span>
+<span id="cb57-23"><a href="#cb57-23" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb57-24"><a href="#cb57-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">popup.format =</span> <span class="fu">list</span>(</span>
+<span id="cb57-25"><a href="#cb57-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">total_trips =</span> <span class="fu">list</span>(<span class="at">format =</span> <span class="st">"f"</span>, <span class="at">digits =</span> <span class="dv">0</span>)</span>
+<span id="cb57-26"><a href="#cb57-26" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb57-27"><a href="#cb57-27" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb57-28"><a href="#cb57-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">col =</span> <span class="st">"black"</span>, <span class="at">lwd =</span> <span class="fl">0.4</span>)</span>
+<span id="cb57-29"><a href="#cb57-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-30"><a href="#cb57-30" aria-hidden="true" tabindex="-1"></a>map_hex</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home-1_v2_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>For the <strong>Weekend/Holiday Evening Peak Hours from 4pm to 7pm</strong>, the map would likely show the movement patterns as people conclude their leisure activities or return from day trips. Areas with higher activity could include shopping districts, entertainment venues, or parks, reflecting where people spend their weekend afternoons. The map might also highlight transit routes leading back to residential areas, indicating the flow of people heading home. This visualization is invaluable for transit planners to understand and respond to weekend evening travel habits, ensuring efficient and adequate transportation services during these times, and enhancing the overall weekend travel experience.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
