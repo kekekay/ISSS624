@@ -665,9 +665,9 @@ if (!("sf" %in% class(merged_data5_8))) {
   merged_data5_8 <- st_as_sf(merged_data5_8, geom_col = "area_hexagon_grid")
 }
 # Step 3: Recreate the neighbor list and spatial weights
-listw <- nb2listw(merged_data5_8$nb, style = "W")
+listw58 <- nb2listw(merged_data5_8$nb, style = "W")
 nrow(merged_data5_8)
-length(listw$neighbours)
+length(listw58$neighbours)
 
 # Recreate neighbors list
 nei58 <- poly2nb(merged_data5_8)
@@ -727,9 +727,9 @@ if (!("sf" %in% class(merged_data112))) {
   merged_data112 <- st_as_sf(merged_data112, geom_col = "area_hexagon_grid")
 }
 # Step 3: Recreate the neighbor list and spatial weights
-listw <- nb2listw(merged_data112$nb, style = "W")
+listw112 <- nb2listw(merged_data112$nb, style = "W")
 nrow(merged_data112)
-length(listw$neighbours)
+length(listw112$neighbours)
 
 # Recreate neighbors list
 nei112 <- poly2nb(merged_data112)
@@ -789,9 +789,9 @@ if (!("sf" %in% class(merged_data47))) {
   merged_data47 <- st_as_sf(merged_data47, geom_col = "area_hexagon_grid")
 }
 # Step 3: Recreate the neighbor list and spatial weights
-listw <- nb2listw(merged_data47$nb, style = "W")
+listw47 <- nb2listw(merged_data47$nb, style = "W")
 nrow(merged_data47)
-length(listw$neighbours)
+length(listw47$neighbours)
 
 # Recreate neighbors list
 nei47 <- poly2nb(merged_data47)
@@ -845,29 +845,103 @@ tmap_arrange(map_moran69_i, map_moran69_p,
              ncol = 2)
 ```
 
+[Weekday Morning 6-9 am:]{.underline} This map typically shows lower Local Moran's I values, suggesting less spatial clustering during these hours. This could be due to a more dispersed pattern of commuters traveling from various residential areas to different employment centers.
+
+[Weekday Afternoon 5-8 pm:]{.underline} Similarly, this map indicates lower values, which might reflect a return pattern from work where people are heading to a broader range of destinations, including home, after-work activities, or other errands.
+
+[Holiday 11 am-2 pm:]{.underline} The increased variation in Local Moran's I values during these hours suggests that there are more pronounced clusters of trip activity. This is likely reflective of people gathering at specific locations for leisure activities, such as shopping areas, restaurants, or parks.
+
+[Holiday 4-7 pm:]{.underline} This period shows significant clustering with high Local Moran's I values, indicating potential hotspots of activity where people may be congregating, possibly in entertainment or dining districts, or beginning to return home from their day's activities.
+
+### **Preparing LISA map classes**
+
 ```{r}
 quadrant69 <- vector(mode="numeric",length=nrow(localMI69))
+merged_data6_9$total_trips <- lag.listw(listw2, merged_data6_9$total_trips)
+DV69 <- merged_data6_9$total_trips - mean(merged_data6_9$total_trips)     
+```
+
+```{r}
 quadrant58 <- vector(mode="numeric",length=nrow(localMI58))
+merged_data5_8$total_trips <- lag.listw(listw58, merged_data5_8$total_trips)
+DV58 <- merged_data5_8$total_trips - mean(merged_data5_8$total_trips)  
+
+
 quadrant112 <- vector(mode="numeric",length=nrow(localMI112))
+merged_data112$total_trips <- lag.listw(listw112, merged_data112$total_trips)
+DV112 <- merged_data112$total_trips - mean(merged_data112$total_trips)  
+
 quadrant47 <- vector(mode="numeric",length=nrow(localMI47))
+merged_data47$total_trips <- lag.listw(listw47, merged_data47$total_trips)
+DV47 <- merged_data47$total_trips - mean(merged_data47$total_trips)  
+
+
+```
+
+```{r}
+LM_I69 <- localMI69[,1] - mean(localMI69[,1])   
+LM_I58 <- localMI58[,1] - mean(localMI58[,1])
+LM_I112 <- localMI112[,1] - mean(localMI112[,1])
+LM_I47 <- localMI47[,1] - mean(localMI47[,1])
+```
+
+```{r}
+signif <- 0.05       
+
+quadrant69[DV69 <0 & LM_I69>0] <- 1
+quadrant69[DV69 >0 & LM_I69<0] <- 2
+quadrant69[DV69 <0 & LM_I69<0] <- 3  
+quadrant69[DV69 >0 & LM_I69>0] <- 4    
+
+quadrant58[DV58 <0 & LM_I58>0] <- 1
+quadrant58[DV58 >0 & LM_I58<0] <- 2
+quadrant58[DV58 <0 & LM_I58<0] <- 3  
+quadrant58[DV58 >0 & LM_I58>0] <- 4
+
+quadrant47[DV47 <0 & LM_I47>0] <- 1
+quadrant47[DV47 >0 & LM_I47<0] <- 2
+quadrant47[DV47 <0 & LM_I47<0] <- 3  
+quadrant47[DV47 >0 & LM_I47>0] <- 4
+
+quadrant112[DV112 <0 & LM_I112>0] <- 1
+quadrant112[DV112 >0 & LM_I112<0] <- 2
+quadrant112[DV112 <0 & LM_I112<0] <- 3  
+quadrant112[DV112 >0 & LM_I112>0] <- 4
+
+
+
+
+```
+
+```{r}
+quadrant69[localMI69[,5]>signif] <- 0
+quadrant58[localMI58[,5]>signif] <- 0
+quadrant47[localMI47[,5]>signif] <- 0
+quadrant112[localMI112[,5]>signif] <- 0
+```
+
+### **Plotting LISA map**
+
+Since Holiday 4-7 pm period has the highest Local Moran's I value, we visualize in the maps below with one showing all values and the others displaying only statistically significant clusters (p-value \<0.05) with both cluster's I and corresponding p value.
+
+```{r}
+merged_data47.localMI47$quadrant47 <- quadrant47
+colors <- c("#ffffff", "#2c7bb6", "#abd9e9", "#fdae61", "#d7191c")
+clusters <- c("insignificant", "low-low", "low-high", "high-low", "high-high")
+
 ```
 
 ```{r}
 
-
-lag_merged_data6_9$total_trips <- lag.listw(listw2, merged_data6_9$total_trips)
-DV69 <- hunan$lag_GDPPC - mean(hunan$lag_GDPPC)     
-```
-
-```{r}
 tmap_mode("plot")
 
-plot_69_all <- 
-  tm_shape(merged_data6_9.localMI69) +
+plot_47_all <- 
+  tm_shape(merged_data47.localMI47) +
   tm_fill(
-    col = "Ii",
+    col = "quadrant47",
     style = "cat",
-    palette = "Spectral"
+    palette = "Spectral",
+    labels = (clusters[c(sort(unique(quadrant47)))+1])
   ) +
   tm_layout(
     main.title = "Map 1: Local Moran Clusters",
@@ -875,47 +949,71 @@ plot_69_all <-
     main.title.position = "center",
     frame = FALSE)
 
-mean_69 <- merged_data6_9.localMI69  %>%
+mean_47 <- merged_data47.localMI47  %>%
   filter(Ii <= 0.05)
 
-mean_69_p <- merged_data6_9.localMI69  %>%
+mean_47_p <- merged_data47.localMI47  %>%
   filter(Pr.Ii <= 0.05)
 
-plot_69_mean <- 
-  tm_shape(merged_data6_9.localMI69) +
+plot_47_mean <- 
+  tm_shape(merged_data47.localMI47) +
   tm_polygons(
     col = "#ffffff"
   ) +
   tm_borders(col = NA) +
-  tm_shape(mean_69) +
+  tm_shape(mean_47) +
   tm_fill(
-    col = "Ii",
+    col = "quadrant47",
     style = "cat",
-    palette = "PuRd"
+    palette = "Set3",
+    labels = (clusters[c(sort(unique(quadrant47)))+1])
   ) +
   tm_layout(
-    main.title = "Map 2: Local Moran Clusters (P value is 0.05 or lesser)",
+    main.title = "Map 2: Local Moran Clusters' I (P value < 0.05)",
     main.title.size = 1,
     main.title.position = "center",
     frame = FALSE)
 
-plot_69_mean_p <- 
-  tm_shape(merged_data6_9.localMI69) +
+plot_47_mean_p <- 
+  tm_shape(merged_data47.localMI47) +
   tm_polygons(
     col = "#ffffff"
   ) +
   tm_borders(col = NA) +
-  tm_shape(mean_69_p) +
+  tm_shape(mean_47_p) +
   tm_fill(
-    col = "Ii",
+    col = "quadrant47",
     style = "cat",
-    palette = "PuRd"
+    palette = "Set2",
+    labels = (clusters[c(sort(unique(quadrant47)))+1])
   ) +
   tm_layout(
-    main.title = "Map 3: Local Moran Clusters Simulated (P value is 0.05 or lesser)",
+    main.title = "Map 3: Local Moran Clusters' I P-value (P value < 0.05)",
     main.title.size = 1,
     main.title.position = "center",
     frame = FALSE)
 
-plot_69_all
+plot_47_all
+
 ```
+
+The clusters of weekend 4-7 pm traffic are categorized into four types based on the Local Moran's I statistics:
+
+[High-High (blue):]{.underline} These are hot spots where high values are surrounded by high values. This indicates areas with a significantly higher number of bus trips or ridership, possibly due to popular destinations or transit hubs. E.g. Woodlands, Vivocity.
+
+[Low-Low (orange):]{.underline} These are cold spots where low values are surrounded by low values. These areas might have less demand for public transport or could be residential areas with fewer bus stops. e.g. Jurong west.
+
+[High-Low (green):]{.underline} These are spatial outliers where high values are surrounded by low values. These might be areas that are exceptionally busy during these hours, such as malls or event venues.
+
+[Low-High (yellow):]{.underline} These are also spatial outliers but with low values surrounded by high values. These could be quieter neighborhoods adjacent to very busy areas. we can see the centre of these clusters are high-high value clusters.
+
+[Insignificant (red):]{.underline} These areas do not show any significant clustering at the given significance level.
+
+```{r}
+tmap_arrange(plot_47_mean,plot_47_mean_p ,
+             ncol = 1)
+
+
+```
+
+It is evident that certain areas within the region exhibit significant spatial clustering where the number of trips is either higher or lower than expected given the surrounding areas. The significance and type of clustering can inform urban planners where to focus resources for enhancing public transit or investigating unique transit behavior. For instance, the purple areas might be targets for transit service improvements due to high demand, while blue areas might warrant investigation into why they are outliers.
