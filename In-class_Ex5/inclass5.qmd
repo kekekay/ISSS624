@@ -1,0 +1,220 @@
+---
+title: "inclass_5"
+---
+
+```{r}
+devtools::install_github("LukeCe/spflow",force = TRUE) 
+
+
+
+
+
+```
+
+```{r}
+pacman::p_load(tmap, sf, spdep, sp, Matrix, spflow, reshape2, knitr, tidyverse)
+```
+
+```{r}
+mpsz <- st_read(dsn = "data/geospatial",
+                layer = "MPSZ-2019") %>%
+  st_transform(crs = 3414)
+```
+
+::: callout-note
+abc
+:::
+
+intersect to see how many busstops in each planning subzone
+
+```{r}
+
+```
+
+filter 0 values - mpsz-busstop
+
+```{r}
+
+```
+
+prepare spatial weights
+
+use k-means to find 3 nearby neighbors mpsz_nb - summary of neighbour list
+
+take note -preparing the spatial weights - exclude those messy maps
+
+#\| eval:false - for those time consuming computation, hide it
+
+## Getting started
+
+```{r}
+mpsz_nb <- read_rds("data/rds/mpsz_nb.rds") 
+mpsz_flow <- read_rds("data/rds/mpsz_flow.rds") 
+mpsz_var <- read_rds("data/rds/mpsz_var.rds")
+```
+
+origin-sz should be grid , must be char
+
+the 0 values can be retained coz it jusr measn there is no flow between 2 bus stops
+
+```{r}
+
+mpsz_net <- spflow_network(
+  id_net = "sg",
+  node_neighborhood = 
+    nb2mat(mpsz_nb$by_contiguity),
+  node_data = mpsz_var,
+  node_key_column = "SZ_CODE")
+
+mpsz_net
+```
+
+`spflow_network` : neighbour list ,which matrix to use(Kmeans or contiguity)
+
+id_net: re-assign ID - new
+
+so that we can have a table includes all the areas and their neighbours
+
+adding in flow w the net
+
+take note of the sequence of orig_key_col and des_key_col
+
+```{r}
+mpsz_net_pairs <- spflow_network_pair(
+  id_orig_net = "sg",
+  id_dest_net = "sg",
+  pair_data = mpsz_flow,
+  orig_key_column = "ORIGIN_SZ",
+  dest_key_column = "DESTIN_SZ")
+
+mpsz_net_pairs
+```
+
+combine mpsz_net and net_pairs to get mpsz_multi_net
+
+```{r}
+mpsz_multi_net <- spflow_network_multi(mpsz_net, mpsz_net_pairs)
+
+mpsz_multi_net
+```
+
+since we only have 313 geo areas after we removed all the nobusstop value, so total number of flow should be 313\^2 - check this if not will have error msg
+
+before regression model, always rmb to check multicollinearity
+
+pair_cor() - create correlation matrix (instead 1 by 1)
+
+cor_image() -
+
+for those highly correlated vars, either exclude or combine them tgt if they have similiar
+
+```{r}
+cor_formula <- log(1 + TRIPS) ~     # dependant var - usually is the flow 
+  BUSSTOP_COUNT +
+  AGE7_12 +
+  AGE13_24 +
+  AGE25_64 +
+  SCHOOL_COUNT +
+  BUSINESS_COUNT +
+  RETAILS_COUNT +
+  FINSERV_COUNT +
+  P_(log(DISTANCE + 1))
+
+cor_mat <- pair_cor(
+  mpsz_multi_net,
+  spflow_formula = cor_formula,
+  add_lags_x = FALSE)  # just to test the input var, no need the lag(from continguity)
+
+colnames(cor_mat) <- paste0(
+  substr(
+    colnames(cor_mat),1,3),"...")
+
+  cor_image(cor_mat)
+
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+base_model <- spflow(
+  spflow_formula = log(1 + TRIPS) ~
+    O_(BUSSTOP_COUNT +
+         AGE25_64) +
+    D_(SCHOOL_COUNT +
+         BUSINESS_COUNT +
+         RETAILS_COUNT + 
+         FINSERV_COUNT) +
+    P_(log(DISTANCE + 1)),
+  spflow_networks = mpsz_multi_net)
+  
+base_model
+```
+
+```{r}
+old_par = par(mfrow = c(1,3),
+              mar = c(2,2,2,2))
+
+spflow_moran_plots(base_model)
+```
+
+```{r}
+par(old_par)
+
+corr_residual <- pair_cor(base_model)
+colnames(corr_residual) <- substr(colnames(corr_residual),1,3)
+cor_image(corr_residual)
+```
+
+```{r}
+spflow_formula <- log(1 + TRIPS) ~
+    O_(BUSSTOP_COUNT +
+         AGE25_64) +
+    D_(SCHOOL_COUNT +
+         BUSINESS_COUNT +
+         RETAILS_COUNT + 
+         FINSERV_COUNT) +
+    P_(log(DISTANCE + 1))
+
+model_control <- spflow_control(
+  estimation_method = "mle",
+  model = "model_1")
+  
+mle_model1 <- spflow(
+  spflow_formula,
+  spflow_networks = mpsz_multi_net,
+  estimation_control = model_control)
+
+```
+
+```{r}
+spflow_formula <- log(1 + TRIPS) ~
+    O_(BUSSTOP_COUNT +
+         AGE25_64) +
+    D_(SCHOOL_COUNT +
+         BUSINESS_COUNT +
+         RETAILS_COUNT + 
+         FINSERV_COUNT) +
+    P_(log(DISTANCE + 1))
+
+model_control <- spflow_control(
+  estimation_method = "mle",
+  model = "model_8")
+  
+mle_model8 <- spflow(
+  spflow_formula,
+  spflow_networks = mpsz_multi_net,
+  estimation_control = model_control)
+
+mle_model8
+```
+
+in this model libray, total have 3 models? so can manually change it from 1 2 8?
+
+check documentation again
