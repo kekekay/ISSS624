@@ -1,0 +1,1102 @@
+---
+title: "Take Home Exercise 2"
+date: "11 December 2023"
+date-modified: "last-modified"
+authour: Ke Ke
+format: html
+editor: visual
+theme: minty 
+---
+
+## Overview
+
+## Getting started
+
+-   [tidyverse](https://www.tidyverse.org/) for importing, integrating, wrangling and visualising data.
+
+-   [sf](https://r-spatial.github.io/sf/) for importing, integrating, processing and transforming geospatial data.
+
+-   [sp](https://cran.r-project.org/web/packages/sp/) for spatial data
+
+-   [DT](https://cran.r-project.org/web/packages/DT/) for working with HTTP organised by HTTP verbs.
+
+-   [stplanr](https://cran.r-project.org/web/packages/stplanr/) for transport planning and analysis
+
+-   [reshape2](https://cran.r-project.org/web/packages/reshape2/) for melt function
+
+-   [ggpubr](https://rpkgs.datanovia.com/ggpubr/) for creating publication quality statistical graphics.
+
+-   [tmap](https://cran.r-project.org/web/packages/tmap/vignettes/tmap-getstarted.html) for plotting cartographicquality thematic maps.
+
+-   [performance](https://easystats.github.io/performance/) for computing model comparison matrices such as rmse.
+
+-   [httr](https://cran.r-project.org/web/packages/httr/) for working with HTTP
+
+-   [corrplot](https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html) for correlation matrix
+
+```{r}
+pacman::p_load(tidyverse, sf, sp,DT,stplanr,reshape2,ggpubr,
+               tmap,performance,httr,corrplot)
+```
+
+## Preparing the Flow Data
+
+### Importing the OD data
+
+```{r}
+odbus <- read_csv("data/aspatial/origin_destination_bus_202310.csv")
+```
+
+```{r}
+glimpse(odbus)
+summary(odbus)
+```
+
+```{r}
+# check for NA values
+sum(is.na(odbus))
+sapply(odbus, function(x) sum(is.na(x)))
+
+# convert ORIGIN_PT_CODE and DESTINATION_PT_CODE columns)
+odbus$ORIGIN_PT_CODE <-
+as.factor(odbus$ORIGIN_PT_CODE)
+odbus$DESTINATION_PT_CODE <-
+as.factor(odbus$DESTINATION_PT_CODE)
+
+```
+
+### Data Aggregation
+
+I focus on aggregating weekday trip data between 6 and 9 AM at each origin-destination pair, summing up the total trips to analyze commuting patterns during morning peak hours.
+
+```{r}
+# Aggregate data for between 6 and 9 AM 
+origin6_9wdm <- odbus %>%
+  filter(DAY_TYPE == "WEEKDAY") %>%
+  filter(TIME_PER_HOUR >= 6 & TIME_PER_HOUR <= 9) %>%
+  group_by(ORIGIN_PT_CODE, DESTINATION_PT_CODE) %>%
+  summarise(TRIPS = sum(TOTAL_TRIPS))
+
+```
+
+```{r}
+head(origin6_9wdm)
+```
+
+Save output in rds for later use
+
+```{r}
+write_rds(origin6_9wdm, "data/rds/origin6_9wdm.rds") 
+```
+
+Import rds file in R
+
+```{r}
+origin6_9wdm <- read_rds("data/rds/origin6_9wdm.rds") 
+```
+
+### **Prepare for Geospatial Analysis**
+
+Map the bus stop codes to their geographical locations (latitude and longitude) by joining data with another dataset that contains these geographical coordinates.
+
+below 3 data will be used:
+
+-   *Bus Stop Location* (Last updated Jul 2023) from [**LTADataMall**](https://datamall.lta.gov.sg/content/datamall/en/static-data.html) (Last updated Jul 2023)
+
+-   *Master Plan 2019 Subzone Boundary (No Sea)* from [Data.gov.sg](https://beta.data.gov.sg/) updated on December 23, 2019
+
+-   *hexagon*, a [hexagon](https://desktop.arcgis.com/en/arcmap/latest/tools/spatial-statistics-toolbox/h-whyhexagons.htm) layer of 375m (this distance is the perpendicular distance between the centre of the hexagon and its edges.)
+
+```{r}
+
+busstop <- st_read(dsn = "data/geospatial",
+                   layer = "BusStop") %>%
+  st_transform(crs = 3414)
+
+
+mpsz <- st_read(dsn = "data/geospatial",
+                   layer = "MPSZ-2019") %>%
+  st_transform(crs = 3414)
+
+```
+
+write mpsz sf tibble data frame into an rds file and import in R enviroment
+
+```{r}
+mpsz <- write_rds(mpsz, "data/rds/mpsz.rds")
+
+mpsz <- read_rds("data/rds/mpsz.rds")
+```
+
+```{r}
+glimpse(busstop)
+glimpse(mpsz)
+```
+
+## Geospatial data wrangling
+
+### **Combining Busstop and mpsz**
+
+create **`busstop_mpsz`** by intersecting bus stop locations with Master Plan Subzone Boundaries. This step identifies the subzone each bus stop is located in.
+
+```{r}
+busstop_mpsz <- st_intersection(busstop, mpsz) %>%
+  select(BUS_STOP_N, SUBZONE_C) 
+```
+
+```{r}
+write_rds(busstop_mpsz, "data/rds/busstop_mpsz.rds")  
+```
+
+### **Create Analytical Hexagons**
+
+Create a hexagonal grid to represent Traffic Analysis Zones (TAZs) and add ID to each hexagon:
+
+```{r}
+# cell size of layer of 375m
+area_honeycomb_grid = st_make_grid(busstop_mpsz, c(750, 750), what = "polygons", square = FALSE, crs = 3414)
+
+# To sf and add grid ID
+honeycomb_grid_sf = st_sf(area_honeycomb_grid)
+```
+
+```{r}
+st_write(honeycomb_grid_sf, "data/geospatial/hexagon.shp",append=TRUE)
+```
+
+```{r}
+hexagon <- st_read(dsn = "data/geospatial",
+                   layer = "hexagon") %>%
+  st_transform(crs = 3414)
+```
+
+## **Combine Hexagon and Busstop**
+
+perform spatial joins to map bus stops to their respective hexagons. This mapping is to analyze data within the spatial framework provided by the hexagons.
+
+```{r}
+od_data <- st_join(busstop_mpsz , hexagon,
+            by = c("geometry" = "geometry")) 
+```
+
+```{r}
+hexagon_busstop <- st_join(hexagon, busstop, by = c("FID" = "FID"))
+
+hexagon_busstop <- hexagon_busstop %>%
+  drop_na() %>%
+  group_by(FID)
+
+write_rds(hexagon_busstop, "data/rds/hexagon_busstop.rds")
+```
+
+### Join **OD Data with Geospatial Data**
+
+associate each bus stop code in your origin-destination (OD) data with its corresponding geographical location from the **`busstop`** dataset.
+
+```{r}
+# Join OD data with bus stop geospatial data for both origin and destination
+od_data_1 <- left_join(origin6_9wdm , od_data,
+            by = c("ORIGIN_PT_CODE" = "BUS_STOP_N")) %>%
+  rename(ORIGIN_BS = ORIGIN_PT_CODE,
+         ORIGIN_SZ = SUBZONE_C,
+         DESTIN_BS = DESTINATION_PT_CODE)
+
+# to check for duplicating records
+duplicate <- od_data_1 %>%
+  group_by_all() %>%
+  filter(n()>1) %>%
+  ungroup()
+
+glimpse(duplicate)
+```
+
+only retain unique values
+
+```{r}
+od_data_1 <- unique(od_data_1)
+```
+
+check duplicate again, it should become empty now
+
+```{r}
+duplicate <- od_data_1 %>%
+  group_by_all() %>%
+  filter(n()>1) %>%
+  ungroup()
+glimpse(duplicate)
+```
+
+do the same for destination
+
+```{r}
+od_data_2 <- left_join(od_data_1 , od_data,
+            by = c("DESTIN_BS" = "BUS_STOP_N")) 
+
+duplicate <- od_data_2 %>%
+  group_by_all() %>%
+  filter(n()>1) %>%
+  ungroup()
+
+od_data_2 <- unique(od_data_2)
+
+od_data_2 <- od_data_2 %>%
+  drop_na() %>%
+  group_by(FID.x, FID.y) %>%
+  summarise(MORNING_PEAK = sum(TRIPS))
+
+```
+
+```{r}
+write_rds(od_data_2, "data/rds/od_data_2.rds")
+od_data_2 <- read_rds("data/rds/od_data_2.rds")
+```
+
+## **Visualising Spatial Interaction**
+
+Visualizing spatial interactions using desire lines, a concept in transport planning that represents the movement of commuters between two points.
+
+prepare a desire line by using **stplanr** package
+
+### **Removing intra-zonal flows**
+
+```{r}
+od_data_3 <- od_data_2[od_data_2$FID.x!=od_data_2$FID.y,]
+```
+
+### Creating desire lines
+
+```{r}
+flowLine <- od2line(flow = od_data_3, 
+                    zones = hexagon,
+                    zone_code = "FID")
+```
+
+### Visualizing the desired lines
+
+```{r}
+tmap_mode("plot")
+
+tmap_options(check.and.fix = TRUE)
+tm_shape(mpsz) +
+  tm_polygons() +
+tm_shape(hexagon_busstop) +
+  tm_polygons() +
+flowLine %>%  
+tm_shape() +
+  tm_lines(lwd = "MORNING_PEAK",
+           style = "quantile",
+           scale = c(0.1, 1, 3, 5, 7, 10),
+           n = 6,
+           alpha = 0.3)
+```
+
+Thicker lines indicate higher volumes of commuters, highlighting major transit corridors or popular commuter routes. Below map filters to show only flows with MORNING_PEAK values above 5000, focusing on the most significant commuter movements.
+
+```{r}
+tmap_mode("view")
+tm_shape(mpsz) +
+  tm_polygons() +
+tm_shape(hexagon_busstop) +
+  tm_polygons() +
+flowLine %>%  
+  filter(MORNING_PEAK >= 5000) %>%
+tm_shape() +
+  tm_lines(lwd = "MORNING_PEAK",
+           style = "quantile",
+           scale = c(0.1, 1, 3, 5, 7, 10),
+           n = 6,
+           alpha = 0.3) + tm_dots() + tm_view(set.zoom.limits = c(11,14))
+
+
+```
+
+# **Propulsive and attractiveness variables**
+
+To perform our modelling, we need to identify the **propulsiveness** and **attractiveness** variables we will use for our model.
+
+As our data will be based on real-world data, *Passenger Volume By Origin Destination Bus Stops* from [LTA DataMall](https://datamall.lta.gov.sg/content/datamall/en.html) via API, we can think of possible factors based on our real-world experience.
+
+As we are interested in the factors that influence **weekday morning 6-9am** peak period bus commuting patterns, we will consider the following variables.
+
+**Attractiveness:**
+
+|   VARIABLE NAME   |                                                                 DATA SOURCE                                                                 |                                          DESCRIPTION                                           |                                                             USAGE                                                             |
+|:---------------:|:-------------------:|:---------------:|:----------------:|
+|  BUS_STOP_COUNT   |      *Bus Stop Location* from [LTA DataMall](https://datamall.lta.gov.sg/content/dam/datamall/datasets/Geospatial/BusStopLocation.zip)      |                         commuters travel from bus stop to destination                          |             gauge the density of bus stops, which might influence commuter decisions on where to alight or board.             |
+| TRAIN_EXITS_COUNT | *Train Station* *Exit Point* from [LTA DataMall](https://datamall.lta.gov.sg/content/dam/datamall/datasets/Geospatial/TrainStationExit.zip) |               if there is any potential transition from train station to busstop               |  understanding multimodal transport behavior, especially in urban areas where trains and buses are commonly used in tandem.   |
+|     HDB_COUNT     |                                                `hdb.csv` aspatial data provided by Prof. Kam                                                | the number of Housing Development Board (HDB) units or buildings in the vicinity of a bus stop | understanding how residential patterns affect bus commuting, with areas having more HDB units likely seeing higher bus usage. |
+|  BUSINESS_COUNT   |                                            `business.shp` geospatial data provided by Prof. Kam                                             |                  Counts the number of business establishments near a bus stop                  |   Indicates areas of commercial activity which are likely destinations for commuters, influencing bus stop attractiveness.    |
+|   RETAIL_COUNT    |                                             `Retails.shp` geospatial data provided by Prof. Kam                                             |                     count of retail outlets in the vicinity of a bus stop                      |           indicator of retail activity which can be a major destination for commuters, especially in urban settings           |
+
+```{r}
+
+
+business <- st_read(dsn = "data/geospatial",
+                   layer = "Business") %>%
+  st_transform(crs = 3414)
+
+hexagon_busstop$`BUSINESS_COUNT`<- lengths(
+  st_intersects(
+    hexagon_busstop, business))
+
+summary(hexagon_busstop$BUSINESS_COUNT)
+```
+
+```{r}
+tmap_mode("plot")
+tm_shape(mpsz) +
+  tm_polygons() +
+tm_shape(hexagon_busstop) +
+  tm_polygons() +
+tm_shape(business) +
+  tm_dots() 
+```
+
+### **Business Count**
+
+```{r}
+Retails <- st_read(dsn = "data/geospatial",
+                   layer = "Retails") %>%
+  st_transform(crs = 3414)
+
+```
+
+```{r}
+
+hexagon_busstop$`RETAIL_COUNT`<- lengths(
+  st_intersects(
+    hexagon_busstop, Retails))
+
+summary(hexagon_busstop$RETAIL_COUNT)
+```
+
+```{r}
+tmap_mode("plot")
+tm_shape(mpsz) +
+  tm_polygons() +
+tm_shape(hexagon_busstop) +
+  tm_polygons() +
+tm_shape(Retails) +
+  tm_dots() 
+```
+
+### Retails count
+
+```{r}
+train <- st_read(dsn = "data/geospatial",
+                   layer = "Train_Station_Exit_Layer") %>%
+  st_transform(crs = 3414)
+
+hexagon_busstop$`TRAIN_COUNT`<- lengths(
+  st_intersects(
+    hexagon_busstop, train))
+
+summary(hexagon_busstop$TRAIN_COUNT)
+
+tmap_mode("plot")
+
+tm_shape(mpsz) +
+  tm_polygons() +
+tm_shape(hexagon_busstop) +
+  tm_polygons() +
+tm_shape(train) +
+  tm_dots() 
+```
+
+### **Train Station Exit Count**
+
+```{r}
+
+bus <- st_read(dsn = "data/geospatial",
+                   layer = "BusStop") %>%
+  st_transform(crs = 3414)
+
+hexagon_busstop$`BUS_STOP_COUNT`<- lengths(
+  st_intersects(
+    hexagon_busstop, busstop))
+
+summary(hexagon_busstop$BUS_STOP_COUNT)
+
+tmap_mode("plot")
+
+tm_shape(mpsz) +
+  tm_polygons() +
+tm_shape(hexagon_busstop) +
+  tm_polygons() +
+tm_shape(bus) +
+  tm_dots() 
+```
+
+### **HDB Count**
+
+```{r}
+data <- read.csv("data/aspatial/hdb.csv")
+```
+
+```{r}
+coordinates <- data[, c("lng", "lat")]  
+spatial_points <- SpatialPointsDataFrame(coordinates, data)
+# Create a SpatialPoints object
+coordinates <- data[, c("lng", "lat")]
+spatial_points <- SpatialPoints(coords = coordinates)
+
+# Define the current CRS (WGS84 - EPSG:4326)
+proj4string(spatial_points) <- CRS("+proj=longlat +datum=WGS84")
+
+# Convert SpatialPoints to an sf object
+sf_points <- st_as_sf(spatial_points)
+
+# Define EPSG:3414 CRS
+epsg_3414_crs <- st_crs(3414)
+
+# Transform the sf object to EPSG:3414
+sf_points_3414 <- st_transform(sf_points, crs = epsg_3414_crs)
+
+# Convert back to SpatialPoints
+spatial_points_3414 <- as(sf_points_3414, "Spatial")
+```
+
+```{r}
+tmap_mode("plot")
+tm_shape(mpsz) +
+  tm_polygons() +
+tm_shape(hexagon_busstop) +
+  tm_polygons() +
+tm_shape(spatial_points_3414) +
+  tm_dots()
+```
+
+```{r}
+sf_spatial_points_3414 <- st_as_sf(spatial_points_3414)
+
+intersections <- st_intersects(hexagon_busstop, sf_spatial_points_3414)
+
+hexagon_busstop$HDB_COUNT <- lengths(intersections)
+
+summary(hexagon_busstop$HDB_COUNT)
+```
+
+|                     |
+|---------------------|
+| **Propulsiveness:** |
+
+|   VARIABLE NAME    |                                                             DATA SOURCE                                                              |                                           DESCRIPTION                                            |
+|:----------------:|:------------------------------:|:---------------------:|
+|  BUS_ALIGHT_COUNT  | *Passenger Volume By Origin Destination Bus Stops* from [LTA DataMall](https://datamall.lta.gov.sg/content/datamall/en.html) via API |         Commuters who alight from a bus stop within can transfer to another bus to reach         |
+| TRAIN_ALIGHT_COUNT |        *Passenger Volume By Train Stations* from [LTA DataMall](https://datamall.lta.gov.sg/content/datamall/en.html) via API        | Commuters who alight from a train station can transfer to a bus to reach their final destination |
+| HDB_RESIDENT_COUNT |                                            `hdb.csv` aspatial data provided by Prof. Kam                                             |                         Residents in an area are potential bus commuters                         |
+
+: Singapore Land Authority (SLA) supports an online geocoding service called [OneMap API](https://www.onemap.gov.sg/apidocs/). The [Search](https://www.onemap.gov.sg/apidocs/apidocs) API looks up the address data or 6-digit postal code for an entered value. It then returns both latitude, longitude and x,y coordinates of the searched location.
+
+The code chunks below will perform geocoding using [SLA OneMap API](https://www.onemap.gov.sg/docs/#onemap-rest-apis).
+
+2 tibble data.frames will be created if the geocoding process completed successfully. They are called `found` and `not_found`. `found` contains all records that are geocoded correctly and `not_found` contains postal that failed to be geocoded.
+
+Lastly, the found data table will joined with the initial csv data table by using a unique identifier (i.e. POSTAL) common to both data tables. The output data table will then save as an csv file called `found`.
+
+```{r}
+url<-"https://www.onemap.gov.sg/api/common/elastic/search"
+
+csv<-read_csv("data/aspatial/hdb.csv")
+postcodes<-csv$`postal`
+
+found<-data.frame()
+not_found<-data.frame()
+
+for(postcode in postcodes){
+  query<-list('searchVal'=postcode,'returnGeom'='Y','getAddrDetails'='Y','pageNum'='1')
+  res<- GET(url,query=query)
+  
+  if((content(res)$found)!=0){
+    found<-rbind(found,data.frame(content(res))[4:13])
+  } else{
+    not_found = data.frame(postcode)
+  }
+}
+```
+
+```{r}
+merged = merge(csv, found, by.x = 'postal', by.y = 'results.POSTAL', all = TRUE)
+write.csv(merged, file = "data/aspatial/hdbcsv.csv")
+write.csv(not_found, file = "data/aspatial/not_found.csv")
+```
+
+transform the merged HDB data into a spatial format (**`sf`**) compatible with analysis.
+
+```{r}
+hdbcsv <- read_csv("data/aspatial/hdbcsv.csv") %>%
+  rename(latitude = "results.LATITUDE",
+         longitude = "results.LONGITUDE",address = "results.ADDRESS") %>%
+  select(postal, address, latitude, longitude)
+
+# Identify rows with missing values in "longitude" or "latitude"
+missing_rows <- hdbcsv[is.na(hdbcsv$longitude) | is.na(hdbcsv$latitude), ]
+
+# Display the rows with missing values
+print(missing_rows)
+
+
+```
+
+```{r}
+# Remove rows with missing values in "longitude" or "latitude"
+hdbcsv <- hdbcsv[complete.cases(hdbcsv$longitude, hdbcsv$latitude), ]
+
+hdb_sf <- st_as_sf(hdbcsv, 
+                       coords = c("longitude", "latitude"),
+                       crs=4326) %>%
+  st_transform(crs = 3414)
+```
+
+```{r}
+tmap_options(check.and.fix = TRUE)
+tm_shape(mpsz) +
+  tm_polygons() +
+tm_shape(hexagon_busstop) +
+  tm_polygons() +
+tm_shape(hdb_sf) +
+  tm_dots()
+```
+
+number of hdbs located inside the hexagon layer.
+
+```{r}
+hexagon_busstop$`HDB_COUNT`<- lengths(
+  st_intersects(
+    hexagon_busstop, hdb_sf))
+summary(hexagon_busstop$`HDB_COUNT`)
+```
+
+::: {.callout-note icon="true"}
+We can see there might be 0 values in HDB_COUNT field. If log() is going to use to transform this field, additional step is required to ensure that all 0 will be replaced with a value between 0 and 1 but not 0 neither 1.
+:::
+
+join the hexagonal grid data with flow data (OD data) to add context like retail, business, finance, train station, HDB counts, and bus stop counts to each flow record.
+
+```{r}
+hexagon_busstop_tidy <- hexagon_busstop %>%
+  st_drop_geometry() %>%
+  select(FID, FINANCE_COUNT, BUSINESS_COUNT, RETAIL_COUNT,TRAIN_COUNT,HDB_COUNT,BUS_STOP_COUNT)
+
+flow_data <- od_data_2 %>%
+  left_join(hexagon_busstop_tidy,
+            by = c("FID.y" = "FID"))
+```
+
+```{r}
+summary(flow_data)
+```
+
+replace zero counts in variables with a small non-zero value (0.99)
+
+```{r}
+flow_data$RETAIL_COUNT <- ifelse(
+  flow_data$RETAIL_COUNT == 0,
+  0.99, flow_data$RETAIL_COUNT)
+flow_data$BUSINESS_COUNT <- ifelse(
+  flow_data$BUSINESS_COUNT == 0,
+  0.99, flow_data$BUSINESS_COUNT)
+flow_data$FINANCE_COUNT <- ifelse(
+  flow_data$FINANCE_COUNT == 0,
+  0.99, flow_data$FINANCE_COUNT)
+flow_data$TRAIN_COUNT <- ifelse(
+  flow_data$TRAIN_COUNT == 0,
+  0.99, flow_data$TRAIN_COUNT)
+flow_data$HDB_COUNT <- ifelse(
+  flow_data$HDB_COUNT == 0,
+  0.99, flow_data$HDB_COUNT)
+flow_data$BUS_STOP_COUNT <- ifelse(
+  flow_data$BUS_STOP_COUNT == 0,
+  0.99, flow_data$BUS_STOP_COUNT)
+```
+
+```{r}
+summary(flow_data)
+```
+
+ensure uniqueness in dataset by removing duplicates.
+
+```{r}
+duplicate <- flow_data %>%
+  group_by_all() %>%
+  filter(n()>1) %>%
+  ungroup()
+
+flow_data <- unique(flow_data)
+
+summary(flow_data)
+```
+
+```{r}
+write_rds(flow_data,
+          "data/rds/flow_data_tidy.rds")
+```
+
+## **Computing Distance Matrix**
+
+### **Converting from sf data.table to SpatialPolygonsDataFrame**
+
+In spatial interaction, a distance matrix is a table that shows the distance between pairs of locations.
+
+First [`as.Spatial()`](https://r-spatial.github.io/sf/reference/coerce-methods.html) will be used to convert *mpsz* from sf tibble data frame to SpatialPolygonsDataFrame of sp object as shown in the code chunk below.
+
+```{r}
+hexagon_busstop_sp <- as(hexagon_busstop, "Spatial")
+hexagon_busstop_sp
+```
+
+### **Computing the distance matrix**
+
+Next, [`spDists()`](https://www.rdocumentation.org/packages/sp/versions/2.1-1/topics/spDistsN1) of sp package will be used to compute the Euclidean distance between the centroids of the planning subzones.
+
+```{r}
+dist <- spDists(hexagon_busstop_sp, 
+                longlat = FALSE)
+head(dist, n=c(10, 10))
+```
+
+```{r}
+sz_names <- hexagon_busstop$FID
+colnames(dist) <- paste0(sz_names)
+rownames(dist) <- paste0(sz_names)
+```
+
+pivot the distance matrix into a long table by using the row and column subzone codes 
+
+```{r}
+distPair <- melt(dist) %>%
+  rename(dist = value)
+head(distPair, 10)
+```
+
+select and find out the minimum value of the distance by using `summary()` to update the intra-zonal distances
+
+```{r}
+distPair %>%
+  filter(dist > 0) %>%
+  summary()
+```
+
+the minimum non-zero distance is 750, we will use 200m as our intra-zonal distance
+
+```{r}
+distPair$dist <- ifelse(distPair$dist == 0,
+                        200, distPair$dist)
+```
+
+::: {.callout-tip title="Why use 200m?"}
+Half of the minimum distance of 750m is 375m, any number smaller than 375m and greater than 0 will be acceptable
+:::
+
+Save the output
+
+```{r}
+distPair %>%
+  summary()
+
+distPair <- distPair %>%
+  rename(orig = Var1,
+         dest = Var2)
+
+write_rds(distPair, "data/rds/distPair.rds") 
+```
+
+## **Calibrating Spatial Interaction Models**
+
+### **Importing the flow data**
+
+```{r}
+flow_data
+```
+
+### **Separating intra-flow from passenger volume df**
+
+```{r}
+flow_data$FlowNoIntra <- ifelse(
+  flow_data$FID.x == flow_data$FID.y, 
+  0, flow_data$MORNING_PEAK)
+flow_data$offset <- ifelse(
+  flow_data$FID.x == flow_data$FID.y, 
+  0.000001, 1)
+```
+
+### **Combining flow data with distance value**
+
+```{r}
+flow_data$FID.x <- as.factor(flow_data$FID.x)
+flow_data$FID.y <- as.factor(flow_data$FID.y)
+```
+
+combine distance matrix and flow data
+
+```{r}
+flow_data$FID.x <- as.integer(as.character(flow_data$FID.x))
+flow_data$FID.y <- as.integer(as.character(flow_data$FID.y))
+
+
+flow_data1 <- flow_data %>%
+  left_join (distPair,
+             by = c("FID.x" = "orig",
+                    "FID.y" = "dest"))
+```
+
+retain unique values only
+
+```{r}
+duplicate <- flow_data1 %>%
+  group_by_all() %>%
+  filter(n()>1) %>%
+  ungroup()
+
+flow_data1 <- unique(flow_data1)
+
+write_rds(flow_data1, "data/rds/SIM_data.rds")
+```
+
+## **Calibrating Spatial Interaction Models**
+
+### **Importing the modelling data**
+
+```{r}
+SIM_data <- read_rds("data/rds/SIM_data.rds")
+```
+
+### **Normalisation test by visualising the dependent variable**
+
+Check distribution of "trips" by histogram
+
+```{r}
+ggplot(data = SIM_data,
+       aes(x = MORNING_PEAK)) +
+  geom_histogram()
+```
+
+we can see that the distribution is highly skewed and not resemble normal distribution.
+
+Next, let us visualise the relation between the dependent variable and one of the key independent variable in Spatial Interaction Model, namely distance.
+
+```{r}
+ggplot(data = SIM_data,
+       aes(x = dist,
+           y = MORNING_PEAK)) +
+  geom_point() +
+  geom_smooth(method = lm)
+```
+
+We can see relationship hardly resemble linear relationship.
+
+Use another scatter plot by using the log transformed version of both variables
+
+```{r}
+ggplot(data = SIM_data,
+       aes(x = log(dist),
+           y = log(MORNING_PEAK))) +
+  geom_point() +
+  geom_smooth(method = lm)
+```
+
+their relationship is more resemble linear relationship
+
+### **Checking for variables with zero values**
+
+ensure that no 0 values in the explanatory variables since Poisson Regression is based of log and log 0 is undefined.
+
+```{r}
+summary(SIM_data)
+```
+
+Make sure both FID.x and FID.y are character
+
+```{r}
+SIM_data$FID.x <- as.character(SIM_data$FID.x)
+SIM_data$FID.y <- as.character(SIM_data$FID.y)
+```
+
+### Exploratory Data Analysis
+
+Before performing a correlation check in the context of spatial interaction modeling, filtering out intra-zonal flows is necessary. Intra-zonal flows are the movements within the same zone, and they might not be relevant in the relationships and interactions between different zones.
+
+```{r}
+inter_zonal_flow <- SIM_data %>%
+  filter(FlowNoIntra > 0)
+
+
+```
+
+to check any missing value
+
+```{r}
+sum(is.na(inter_zonal_flow))
+```
+
+```{r}
+summary(inter_zonal_flow)
+```
+
+### **Correlation Analysis**
+
+```{r}
+inter_zonal_flow$RETAIL_COUNT<- as.numeric(inter_zonal_flow$RETAIL_COUNT)
+
+inter_zonal_flow$BUSINESS_COUNT<- as.numeric(inter_zonal_flow$BUSINESS_COUNT)
+
+inter_zonal_flow$HDB_COUNT<- as.numeric(inter_zonal_flow$HDB_COUNT)
+
+inter_zonal_flow$TRAIN_COUNT<- as.numeric(inter_zonal_flow$TRAIN_COUNT)
+
+inter_zonal_flow$FINANCE_COUNT<- as.numeric(inter_zonal_flow$FINANCE_COUNT) 
+
+inter_zonal_flow$BUS_STOP_COUNT<- as.numeric(inter_zonal_flow$BUS_STOP_COUNT)   
+```
+
+```{r}
+vars.cor = cor(inter_zonal_flow[,4:9])
+corrplot.mixed(vars.cor,
+         lower = "ellipse", 
+               upper = "number",
+               tl.pos = "lt",
+               diag = "l",
+              title = "Correlation map of model variables"
+               tl.col = "blue")
+```
+
+FINANCE_COUNT and TRAIN_COUNT seems to be correlated (R = 0.77),we shall remove FINANCE_COUNT in the modelling.
+
+## **Spatial Interaction Model**
+
+### **1. Unconstrained**
+
+The Unconstrained Spatial Interaction Model is the simplest form of SIM. It assumes that the flow of interactions (such as people, goods, or information) between any two locations is independent of flows to/from other locations. This model primarily considers the distance or cost of interaction and the size (or importance) of the locations, but it does not impose any constraints on the total amount of interaction leaving an origin or arriving at a destination.
+
+```{r}
+eval = FALSE
+uncSIM <- glm(formula = MORNING_PEAK ~ 
+                  log(RETAIL_COUNT)+
+                  log(BUSINESS_COUNT)+
+                  log(HDB_COUNT)+
+                  log(TRAIN_COUNT)+
+                  log(BUS_STOP_COUNT)+
+                  log(dist),
+              family = poisson(link = "log"),
+              data = inter_zonal_flow,
+              na.action = na.exclude)
+uncSIM
+```
+
+```{r}
+CalcRSquared <- function(observed, estimated){
+  r <- cor(observed, estimated)
+  R2 <- r^2
+  R2
+}
+```
+
+**Goodness of fit**
+
+```{r}
+CalcRSquared(uncSIM$data$MORNING_PEAK, uncSIM$fitted.values)
+```
+
+### **2. Origin (Production) Constrained**
+
+This model puts a constraint on the total outflow from each origin (also known as the production constraint). It ensures that the total flow of interactions originating from a location equals a predefined value. This model could be useful when the total capacity or potential of each origin is known and needs to be accounted for, such as the number of commuters leaving a residential area.
+
+```{r}
+eval = FALSE
+orcSIM <- glm(formula = MORNING_PEAK ~ 
+                  FID.x +
+                  log(RETAIL_COUNT)+
+                  log(BUSINESS_COUNT)+
+                  log(HDB_COUNT)+
+                  log(TRAIN_COUNT)+
+                  log(BUS_STOP_COUNT)+
+                  log(dist) - 1,
+              family = poisson(link = "log"),
+              data = inter_zonal_flow,
+              na.action = na.exclude)
+summary(orcSIM)
+```
+
+**Goodness of Fit**
+
+```{r}
+CalcRSquared(orcSIM$data$MORNING_PEAK, orcSIM$fitted.values)
+```
+
+### **3. Destination Constrained**
+
+this model imposes constraints on the inflows to each destination. The total amount of interaction arriving at each destination is restricted to match a predefined total.
+
+```{r}
+eval = FALSE
+decSIM <- glm(formula = MORNING_PEAK ~ 
+                  FID.y +
+                  log(RETAIL_COUNT)+
+                  log(BUSINESS_COUNT)+
+                  log(HDB_COUNT)+
+                  log(TRAIN_COUNT)+
+                  log(BUS_STOP_COUNT)+
+                  log(dist) - 1,
+              family = poisson(link = "log"),
+              data = inter_zonal_flow,
+              na.action = na.exclude)
+summary(decSIM)
+```
+
+**Goodness of Fit**
+
+```{r}
+CalcRSquared(decSIM$data$MORNING_PEAK, decSIM$fitted.values)
+```
+
+### **4. Doubly Constrained Model**
+
+the most comprehensive among these models. It imposes constraints on both the outflows from each origin and the inflows to each destination.
+
+```{r}
+eval = FALSE
+dbcSIM_Poisson <- glm(formula = MORNING_PEAK ~ 
+                  FID.x +
+                  FID.y +
+                  log(RETAIL_COUNT)+
+                  log(BUSINESS_COUNT)+
+                  log(HDB_COUNT)+
+                  log(TRAIN_COUNT)+
+                  log(BUS_STOP_COUNT)+
+                  log(dist),
+              family = poisson(link = "log"),
+              data = inter_zonal_flow,
+              na.action = na.exclude)
+summary(dbcSIM_Poisson)
+```
+
+**Goodness of Fit**
+
+```{r}
+CalcRSquared(dbcSIM_Poisson$data$MORNING_PEAK,
+             dbcSIM_Poisson$fitted.values)
+```
+
+## **Model comparison**
+
+create a model_list to store all the previous 4 models
+
+```{r}
+model_list <- list(
+  Unconstrained= uncSIM,
+  Origin_Constrained = orcSIM,
+  Destination_Constrained = decSIM,
+  Doubly_Constrained = dbcSIM_Poisson)
+```
+
+we will compute the RMSE of all the models in *model_list* file
+
+```{r}
+compare_performance(model_list,
+                    metrics = "RMSE")
+
+```
+
+The print above reveals that doubly constrained SIM is the best model among the 4 SIMs because it has the smallest RMSE value.
+
+## **Visualising fitted values**
+
+extract the fitted values from **Origin-constrained Model** by using the code chunk below.
+
+```{r}
+df <- as.data.frame(orcSIM$fitted.values) %>%
+  round(digits = 0)
+```
+
+append the fitted values into *inter_zonal_flow* data frame by using the code chunk below.
+
+```{r}
+inter_zonal_flow <- inter_zonal_flow %>%
+  cbind(df) %>%
+  rename(orcTRIPS = "orcSIM$fitted.values")
+```
+
+do the same for **dbcSIM_Poisson**
+
+```{r}
+df1 <- as.data.frame(dbcSIM_Poisson$fitted.values) %>%
+  round(digits = 0)
+
+inter_zonal_flow <- inter_zonal_flow %>%
+  cbind(df1) %>%
+  rename(dbcTRIPS = "dbcSIM_Poisson$fitted.values")
+```
+
+do the same for **uncSIM**
+
+```{r}
+df2 <- as.data.frame(uncSIM$fitted.values) %>%
+  round(digits = 0)
+
+inter_zonal_flow <- inter_zonal_flow %>%
+  cbind(df2) %>%
+  rename(uncTRIPS = "uncSIM$fitted.values")
+```
+
+do the same for **decSIM**
+
+```{r}
+df3 <- as.data.frame(decSIM$fitted.values) %>%
+  round(digits = 0)
+
+inter_zonal_flow <- inter_zonal_flow %>%
+  cbind(df3) %>%
+  rename(decTRIPS = "decSIM$fitted.values")
+```
+
+Plot 4 scatterplots by using [`geom_point()`](https://ggplot2.tidyverse.org/reference/geom_point.html) and other appropriate functions of [**ggplot2**](https://ggplot2.tidyverse.org/) package
+
+```{r}
+orc_p <- ggplot(data = inter_zonal_flow,
+                aes(x = orcTRIPS,
+                    y = MORNING_PEAK)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  coord_cartesian(xlim=c(0,100000),
+                  ylim=c(0,100000))
+
+dbc_p <- ggplot(data = inter_zonal_flow,
+                aes(x = dbcTRIPS,
+                    y = MORNING_PEAK)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  coord_cartesian(xlim=c(0,100000),
+                  ylim=c(0,100000))
+
+
+unc_p <- ggplot(data = inter_zonal_flow,
+                aes(x = uncTRIPS,
+                    y = MORNING_PEAK)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  coord_cartesian(xlim=c(0,100000),
+                  ylim=c(0,100000))
+
+
+dec_p <- ggplot(data = inter_zonal_flow,
+                aes(x = decTRIPS,
+                    y = MORNING_PEAK)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  coord_cartesian(xlim=c(0,100000),
+                  ylim=c(0,100000))
+```
+
+```{r}
+ggarrange(unc_p, orc_p, dec_p, dbc_p,
+          ncol = 2,
+          nrow = 2)
+```
+
+## **Modelling Results**
+
+In conclusion, the comparative analysis of the four Spatial Interaction Models (SIMs) -- Unconstrained, Origin Constrained, Destination Constrained, and Doubly Constrained -- revealed that the Doubly Constrained Model is the most effective for our study on morning peak public transport flows. This model stood out with the highest goodness of fit and the lowest RMSE value, indicating its superior accuracy and predictive capability. It adeptly accounted for the limitations and capacities at both the origins and destinations, capturing the complex dynamics of urban transportation more holistically than the other models.
+
+## Conclusion
+
+In this report, we embarked on a comprehensive analysis of urban mobility patterns, specifically focusing on Singapore's public bus commuter flows during the weekday morning peak hours. Utilizing advanced Spatial Interaction Models (SIMs), we delved into the complex dynamics of public transportation, aiming to understand the factors influencing commuter behavior and transit usage.

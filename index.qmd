@@ -1,5 +1,6 @@
 ---
 title: "ISSS624"
+theme: minty
 ---
 
 Welcome to ISSS624 Geospatial Analytics Applications!
