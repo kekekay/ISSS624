@@ -10,6 +10,8 @@ theme: minty
 
 ## Overview
 
+This study focuses on analyzing weekday morning peak bus commuter flows (6 AM to 9 AM) in Singapore, aiming to understand travel patterns and behaviors during these crucial hours. By examining spatial interactions among various locales, the study seeks to uncover key trends in urban mobility and commuter preferences.
+
 ## Getting started
 
 -   [tidyverse](https://www.tidyverse.org/) for importing, integrating, wrangling and visualising data.
@@ -321,7 +323,7 @@ As we are interested in the factors that influence **weekday morning 6-9am** pea
 **Attractiveness:**
 
 |   VARIABLE NAME   |                                                                 DATA SOURCE                                                                 |                                          DESCRIPTION                                           |                                                             USAGE                                                             |
-|:---------------:|:-------------------:|:---------------:|:----------------:|
+|:----------------:|:-----------------:|:----------------:|:----------------:|
 |  BUS_STOP_COUNT   |      *Bus Stop Location* from [LTA DataMall](https://datamall.lta.gov.sg/content/dam/datamall/datasets/Geospatial/BusStopLocation.zip)      |                         commuters travel from bus stop to destination                          |             gauge the density of bus stops, which might influence commuter decisions on where to alight or board.             |
 | TRAIN_EXITS_COUNT | *Train Station* *Exit Point* from [LTA DataMall](https://datamall.lta.gov.sg/content/dam/datamall/datasets/Geospatial/TrainStationExit.zip) |               if there is any potential transition from train station to busstop               |  understanding multimodal transport behavior, especially in urban areas where trains and buses are commonly used in tandem.   |
 |     HDB_COUNT     |                                                `hdb.csv` aspatial data provided by Prof. Kam                                                | the number of Housing Development Board (HDB) units or buildings in the vicinity of a bus stop | understanding how residential patterns affect bus commuting, with areas having more HDB units likely seeing higher bus usage. |
@@ -481,7 +483,7 @@ summary(hexagon_busstop$HDB_COUNT)
 | **Propulsiveness:** |
 
 |   VARIABLE NAME    |                                                             DATA SOURCE                                                              |                                           DESCRIPTION                                            |
-|:----------------:|:------------------------------:|:---------------------:|
+|:----------------:|:-----------------------------:|:---------------------:|
 |  BUS_ALIGHT_COUNT  | *Passenger Volume By Origin Destination Bus Stops* from [LTA DataMall](https://datamall.lta.gov.sg/content/datamall/en.html) via API |         Commuters who alight from a bus stop within can transfer to another bus to reach         |
 | TRAIN_ALIGHT_COUNT |        *Passenger Volume By Train Stations* from [LTA DataMall](https://datamall.lta.gov.sg/content/datamall/en.html) via API        | Commuters who alight from a train station can transfer to a bus to reach their final destination |
 | HDB_RESIDENT_COUNT |                                            `hdb.csv` aspatial data provided by Prof. Kam                                             |                         Residents in an area are potential bus commuters                         |
@@ -576,7 +578,7 @@ join the hexagonal grid data with flow data (OD data) to add context like retail
 ```{r}
 hexagon_busstop_tidy <- hexagon_busstop %>%
   st_drop_geometry() %>%
-  select(FID, FINANCE_COUNT, BUSINESS_COUNT, RETAIL_COUNT,TRAIN_COUNT,HDB_COUNT,BUS_STOP_COUNT)
+  select(FID, BUSINESS_COUNT, RETAIL_COUNT,TRAIN_COUNT,HDB_COUNT,BUS_STOP_COUNT)
 
 flow_data <- od_data_2 %>%
   left_join(hexagon_busstop_tidy,
@@ -596,9 +598,7 @@ flow_data$RETAIL_COUNT <- ifelse(
 flow_data$BUSINESS_COUNT <- ifelse(
   flow_data$BUSINESS_COUNT == 0,
   0.99, flow_data$BUSINESS_COUNT)
-flow_data$FINANCE_COUNT <- ifelse(
-  flow_data$FINANCE_COUNT == 0,
-  0.99, flow_data$FINANCE_COUNT)
+
 flow_data$TRAIN_COUNT <- ifelse(
   flow_data$TRAIN_COUNT == 0,
   0.99, flow_data$TRAIN_COUNT)
@@ -658,6 +658,10 @@ head(dist, n=c(10, 10))
 ```{r}
 sz_names <- hexagon_busstop$FID
 colnames(dist) <- paste0(sz_names)
+
+```
+
+```{r}
 rownames(dist) <- paste0(sz_names)
 ```
 
@@ -666,6 +670,7 @@ pivot the distance matrix into a long table by using the row and column subzone 
 ```{r}
 distPair <- melt(dist) %>%
   rename(dist = value)
+
 head(distPair, 10)
 ```
 
@@ -694,11 +699,14 @@ Save the output
 distPair %>%
   summary()
 
+
+```
+
+```{r}
 distPair <- distPair %>%
   rename(orig = Var1,
          dest = Var2)
 
-write_rds(distPair, "data/rds/distPair.rds") 
 ```
 
 ## **Calibrating Spatial Interaction Models**
@@ -706,7 +714,7 @@ write_rds(distPair, "data/rds/distPair.rds")
 ### **Importing the flow data**
 
 ```{r}
-flow_data
+head(flow_data, 10)
 ```
 
 ### **Separating intra-flow from passenger volume df**
@@ -835,6 +843,8 @@ summary(inter_zonal_flow)
 
 ### **Correlation Analysis**
 
+plot the correlation matrix using `corrplot()` at significance level of **0.05**
+
 ```{r}
 inter_zonal_flow$RETAIL_COUNT<- as.numeric(inter_zonal_flow$RETAIL_COUNT)
 
@@ -844,23 +854,27 @@ inter_zonal_flow$HDB_COUNT<- as.numeric(inter_zonal_flow$HDB_COUNT)
 
 inter_zonal_flow$TRAIN_COUNT<- as.numeric(inter_zonal_flow$TRAIN_COUNT)
 
-inter_zonal_flow$FINANCE_COUNT<- as.numeric(inter_zonal_flow$FINANCE_COUNT) 
 
 inter_zonal_flow$BUS_STOP_COUNT<- as.numeric(inter_zonal_flow$BUS_STOP_COUNT)   
 ```
 
 ```{r}
 vars.cor = cor(inter_zonal_flow[,4:9])
-corrplot.mixed(vars.cor,
-         lower = "ellipse", 
-               upper = "number",
-               tl.pos = "lt",
-               diag = "l",
-              title = "Correlation map of model variables"
-               tl.col = "blue")
+corrplot(corr = vars.cor,
+    type = "lower",
+    method = "square",
+    title = "Correlation of model variables",
+    addCoef.col = "white",
+    number.cex = 0.5,
+    number.digits = 2,
+    tl.col = "blue",
+    tl.cex = 0.5,
+    tl.srt = 45,
+    sig.level = 0.05,
+    insig = "blank")
 ```
 
-FINANCE_COUNT and TRAIN_COUNT seems to be correlated (R = 0.77),we shall remove FINANCE_COUNT in the modelling.
+all variables will be retained
 
 ## **Spatial Interaction Model**
 
@@ -869,7 +883,7 @@ FINANCE_COUNT and TRAIN_COUNT seems to be correlated (R = 0.77),we shall remove 
 The Unconstrained Spatial Interaction Model is the simplest form of SIM. It assumes that the flow of interactions (such as people, goods, or information) between any two locations is independent of flows to/from other locations. This model primarily considers the distance or cost of interaction and the size (or importance) of the locations, but it does not impose any constraints on the total amount of interaction leaving an origin or arriving at a destination.
 
 ```{r}
-eval = FALSE
+
 uncSIM <- glm(formula = MORNING_PEAK ~ 
                   log(RETAIL_COUNT)+
                   log(BUSINESS_COUNT)+
@@ -880,7 +894,7 @@ uncSIM <- glm(formula = MORNING_PEAK ~
               family = poisson(link = "log"),
               data = inter_zonal_flow,
               na.action = na.exclude)
-uncSIM
+
 ```
 
 ```{r}
@@ -891,7 +905,7 @@ CalcRSquared <- function(observed, estimated){
 }
 ```
 
-**Goodness of fit**
+#### **Goodness of fit**
 
 ```{r}
 CalcRSquared(uncSIM$data$MORNING_PEAK, uncSIM$fitted.values)
@@ -902,7 +916,7 @@ CalcRSquared(uncSIM$data$MORNING_PEAK, uncSIM$fitted.values)
 This model puts a constraint on the total outflow from each origin (also known as the production constraint). It ensures that the total flow of interactions originating from a location equals a predefined value. This model could be useful when the total capacity or potential of each origin is known and needs to be accounted for, such as the number of commuters leaving a residential area.
 
 ```{r}
-eval = FALSE
+
 orcSIM <- glm(formula = MORNING_PEAK ~ 
                   FID.x +
                   log(RETAIL_COUNT)+
@@ -917,7 +931,7 @@ orcSIM <- glm(formula = MORNING_PEAK ~
 summary(orcSIM)
 ```
 
-**Goodness of Fit**
+#### **Goodness of Fit**
 
 ```{r}
 CalcRSquared(orcSIM$data$MORNING_PEAK, orcSIM$fitted.values)
@@ -928,7 +942,7 @@ CalcRSquared(orcSIM$data$MORNING_PEAK, orcSIM$fitted.values)
 this model imposes constraints on the inflows to each destination. The total amount of interaction arriving at each destination is restricted to match a predefined total.
 
 ```{r}
-eval = FALSE
+
 decSIM <- glm(formula = MORNING_PEAK ~ 
                   FID.y +
                   log(RETAIL_COUNT)+
@@ -943,7 +957,7 @@ decSIM <- glm(formula = MORNING_PEAK ~
 summary(decSIM)
 ```
 
-**Goodness of Fit**
+#### **Goodness of Fit**
 
 ```{r}
 CalcRSquared(decSIM$data$MORNING_PEAK, decSIM$fitted.values)
@@ -954,7 +968,7 @@ CalcRSquared(decSIM$data$MORNING_PEAK, decSIM$fitted.values)
 the most comprehensive among these models. It imposes constraints on both the outflows from each origin and the inflows to each destination.
 
 ```{r}
-eval = FALSE
+
 dbcSIM_Poisson <- glm(formula = MORNING_PEAK ~ 
                   FID.x +
                   FID.y +
@@ -970,7 +984,7 @@ dbcSIM_Poisson <- glm(formula = MORNING_PEAK ~
 summary(dbcSIM_Poisson)
 ```
 
-**Goodness of Fit**
+#### **Goodness of Fit**
 
 ```{r}
 CalcRSquared(dbcSIM_Poisson$data$MORNING_PEAK,
@@ -1097,6 +1111,22 @@ ggarrange(unc_p, orc_p, dec_p, dbc_p,
 
 In conclusion, the comparative analysis of the four Spatial Interaction Models (SIMs) -- Unconstrained, Origin Constrained, Destination Constrained, and Doubly Constrained -- revealed that the Doubly Constrained Model is the most effective for our study on morning peak public transport flows. This model stood out with the highest goodness of fit and the lowest RMSE value, indicating its superior accuracy and predictive capability. It adeptly accounted for the limitations and capacities at both the origins and destinations, capturing the complex dynamics of urban transportation more holistically than the other models.
 
+From unconstrained model we can see the significance of variables:
+
+[log(RETAIL_COUNT) (0.06166)]{.underline} - an increase in the log of retail count is associated with an increase in MORNING_PEAK traffic. The positive coefficient suggests that areas with more retail outlets tend to experience slightly higher commuter traffic during the morning peak.
+
+[log(BUSINESS_COUNT) (-0.02176)]{.underline} - an increase in the number of businesses is associated with a slight decrease in MORNING_PEAK traffic. This could imply that areas with a higher concentration of businesses might see slightly less bus traffic, possibly due to commuters change to MRT or cab or other private transport.
+
+[log(HDB_COUNT) (0.11907)]{.underline} - a higher count of HDB residences, when log-transformed, are likely to experience higher morning peak traffic. This aligns with the expectation that more residential units contribute to higher public transport usage.
+
+[log(TRAIN_COUNT) (0.49000)]{.underline} - a higher log of train station exit count significantly increases MORNING_PEAK traffic. This substantial positive coefficient indicates a strong relationship between the availability of train exits and bus commuter traffic, underscoring the importance of train-to-bus connectivity.
+
+[log(BUS_STOP_COUNT) (0.20603) -]{.underline} Similar to retail and HDB counts, a higher log of bus stop count leads to an increase in MORNING_PEAK traffic. This positive coefficient highlights the role of bus stop density in influencing commuter flows.
+
+[log(dist) (-1.45718) -]{.underline} an increase in the log-transformed distance significantly decreases MORNING_PEAK traffic. The strong negative value indicates that as distance increases, the likelihood of using bus services during peak hours decreases, possibly due to commuters opting for faster modes of transport for longer distances.
+
 ## Conclusion
 
-In this report, we embarked on a comprehensive analysis of urban mobility patterns, specifically focusing on Singapore's public bus commuter flows during the weekday morning peak hours. Utilizing advanced Spatial Interaction Models (SIMs), we delved into the complex dynamics of public transportation, aiming to understand the factors influencing commuter behavior and transit usage.
+In this report, we conducted a thorough analysis of urban mobility, with a particular focus on the dynamics of Singapore's public bus commuter flows during weekday morning peak hours. Leveraging the capabilities of advanced Spatial Interaction Models (SIMs), our objective was to unravel the intricate aspects of public transportation and identify the key factors that shape commuter behavior and transit usage.
+
+Our findings from the analysis illuminate the primary influences on morning peak bus traffic. Notably, the accessibility of train stations, the density of residential areas (as indicated by HDB counts), and the abundance of bus stops emerged as significant positive drivers of bus commuter flow. These factors underscore the critical interplay between public transport modes and urban residential patterns in shaping commuter preferences. Conversely, an increased business count and greater commuting distances were found to negatively impact bus traffic, suggesting a preference for alternative transport modes or routes under such conditions.

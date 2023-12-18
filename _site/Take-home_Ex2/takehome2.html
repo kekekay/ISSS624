@@ -152,6 +152,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="dropdown-item" href="../In-class_Ex3/Inclass_ex3.html" rel="" target="">
  <span class="dropdown-text">In-class Ex3</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../In-class_Ex4/inclass4.html" rel="" target="">
+ <span class="dropdown-text">In-class Ex 4</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../In-class_Ex5/inclass5.html" rel="" target="">
+ <span class="dropdown-text">In-class Ex 5</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -194,6 +202,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#importing-the-od-data" id="toc-importing-the-od-data" class="nav-link" data-scroll-target="#importing-the-od-data">Importing the OD data</a></li>
   <li><a href="#data-aggregation" id="toc-data-aggregation" class="nav-link" data-scroll-target="#data-aggregation">Data Aggregation</a></li>
+  <li><a href="#prepare-for-geospatial-analysis" id="toc-prepare-for-geospatial-analysis" class="nav-link" data-scroll-target="#prepare-for-geospatial-analysis"><strong>Prepare for Geospatial Analysis</strong></a></li>
+  <li><a href="#join-od-data-with-geospatial-data" id="toc-join-od-data-with-geospatial-data" class="nav-link" data-scroll-target="#join-od-data-with-geospatial-data"><strong>Join OD Data with Geospatial Data</strong></a></li>
+  <li><a href="#create-analytical-hexagons" id="toc-create-analytical-hexagons" class="nav-link" data-scroll-target="#create-analytical-hexagons"><strong>Create Analytical Hexagons</strong></a></li>
+  </ul></li>
+  <li><a href="#the-set.zoom.limits-argument-ensures-that-the-map-cannot-be-zommed-out-beyond-singapore-and-also-cannot-be-zoomed-in-too-much-such-that-the-map-cannot-be-loaded." id="toc-the-set.zoom.limits-argument-ensures-that-the-map-cannot-be-zommed-out-beyond-singapore-and-also-cannot-be-zoomed-in-too-much-such-that-the-map-cannot-be-loaded." class="nav-link" data-scroll-target="#the-set.zoom.limits-argument-ensures-that-the-map-cannot-be-zommed-out-beyond-singapore-and-also-cannot-be-zoomed-in-too-much-such-that-the-map-cannot-be-loaded."><strong>The&nbsp;<code>set.zoom.limits</code>&nbsp;argument ensures that the map cannot be zommed out beyond Singapore and also cannot be zoomed in too much such that the map cannot be loaded.</strong></a>
+  <ul class="collapse">
+  <li><a href="#visualising-spatial-interaction" id="toc-visualising-spatial-interaction" class="nav-link" data-scroll-target="#visualising-spatial-interaction"><strong>Visualising Spatial Interaction</strong></a>
+  <ul class="collapse">
+  <li><a href="#removing-intra-zonal-flows" id="toc-removing-intra-zonal-flows" class="nav-link" data-scroll-target="#removing-intra-zonal-flows"><strong>Removing intra-zonal flows</strong></a></li>
+  <li><a href="#creating-desire-lines" id="toc-creating-desire-lines" class="nav-link" data-scroll-target="#creating-desire-lines">Creating desire lines</a></li>
+  <li><a href="#visualizing-the-desired-lines" id="toc-visualizing-the-desired-lines" class="nav-link" data-scroll-target="#visualizing-the-desired-lines">Visualizing the desired lines</a></li>
+  </ul></li>
   </ul></li>
   </ul>
 </nav>
@@ -221,7 +241,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Modified</div>
     <div class="quarto-title-meta-contents">
-      <p class="date-modified">December 13, 2023</p>
+      <p class="date-modified">December 17, 2023</p>
     </div>
   </div>
     
@@ -238,9 +258,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>odbus <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/aspatial/origin_destination_bus_202310.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 5694297 Columns: 7
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr (5): YEAR_MONTH, DAY_TYPE, PT_TYPE, ORIGIN_PT_CODE, DESTINATION_PT_CODE
+dbl (2): TIME_PER_HOUR, TOTAL_TRIPS
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(odbus)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(odbus)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 5,694,297
 Columns: 7
@@ -252,7 +282,7 @@ $ ORIGIN_PT_CODE      &lt;chr&gt; "04168", "04168", "80119", "80119", "44069", "
 $ DESTINATION_PT_CODE &lt;chr&gt; "10051", "10051", "90079", "90079", "17229", "2014…
 $ TOTAL_TRIPS         &lt;dbl&gt; 3, 5, 3, 5, 4, 1, 24, 2, 1, 7, 3, 2, 5, 1, 1, 1, 1…</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(odbus)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(odbus)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  YEAR_MONTH          DAY_TYPE         TIME_PER_HOUR     PT_TYPE         
  Length:5694297     Length:5694297     Min.   : 0.00   Length:5694297    
@@ -276,38 +306,41 @@ $ TOTAL_TRIPS         &lt;dbl&gt; 3, 5, 3, 5, 4, 1, 24, 2, 1, 7, 3, 2, 5, 1, 1, 
 <section id="importing-the-od-data" class="level3">
 <h3 class="anchored" data-anchor-id="importing-the-od-data">Importing the OD data</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># check for NA values</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(odbus))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># check for NA values</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">is.na</span>(odbus))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(odbus, <span class="cf">function</span>(x) <span class="fu">sum</span>(<span class="fu">is.na</span>(x)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(odbus, <span class="cf">function</span>(x) <span class="fu">sum</span>(<span class="fu">is.na</span>(x)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>         YEAR_MONTH            DAY_TYPE       TIME_PER_HOUR             PT_TYPE 
                   0                   0                   0                   0 
      ORIGIN_PT_CODE DESTINATION_PT_CODE         TOTAL_TRIPS 
                   0                   0                   0 </code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># convert ORIGIN_PT_CODE and DESTINATION_PT_CODE columns)</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>odbus<span class="sc">$</span>ORIGIN_PT_CODE <span class="ot">&lt;-</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">as.factor</span>(odbus<span class="sc">$</span>ORIGIN_PT_CODE)</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>odbus<span class="sc">$</span>DESTINATION_PT_CODE <span class="ot">&lt;-</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="fu">as.factor</span>(odbus<span class="sc">$</span>DESTINATION_PT_CODE)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># convert ORIGIN_PT_CODE and DESTINATION_PT_CODE columns)</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>odbus<span class="sc">$</span>ORIGIN_PT_CODE <span class="ot">&lt;-</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">as.factor</span>(odbus<span class="sc">$</span>ORIGIN_PT_CODE)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>odbus<span class="sc">$</span>DESTINATION_PT_CODE <span class="ot">&lt;-</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">as.factor</span>(odbus<span class="sc">$</span>DESTINATION_PT_CODE)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="data-aggregation" class="level3">
 <h3 class="anchored" data-anchor-id="data-aggregation">Data Aggregation</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Aggregate data for a specific time slot</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>origin6_9wdm <span class="ot">&lt;-</span> odbus <span class="sc">%&gt;%</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(DAY_TYPE <span class="sc">==</span> <span class="st">"WEEKDAY"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(TIME_PER_HOUR <span class="sc">&gt;=</span> <span class="dv">6</span> <span class="sc">&amp;</span> TIME_PER_HOUR <span class="sc">&lt;=</span> <span class="dv">9</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(ORIGIN_PT_CODE, DESTINATION_PT_CODE) <span class="sc">%&gt;%</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">TRIPS =</span> <span class="fu">sum</span>(TOTAL_TRIPS))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Aggregate data for a specific time slot</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>origin6_9wdm <span class="ot">&lt;-</span> odbus <span class="sc">%&gt;%</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(DAY_TYPE <span class="sc">==</span> <span class="st">"WEEKDAY"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(TIME_PER_HOUR <span class="sc">&gt;=</span> <span class="dv">6</span> <span class="sc">&amp;</span> TIME_PER_HOUR <span class="sc">&lt;=</span> <span class="dv">9</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(ORIGIN_PT_CODE, DESTINATION_PT_CODE) <span class="sc">%&gt;%</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">TRIPS =</span> <span class="fu">sum</span>(TOTAL_TRIPS))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'ORIGIN_PT_CODE'. You can override using
+the `.groups` argument.</code></pre>
 </div>
-<p>Map the bus stop codes to their geographical locations (latitude and longitude) by joining data with another dataset that contains these geographical coordinates.</p>
+</div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(origin6_9wdm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(origin6_9wdm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 3
 # Groups:   ORIGIN_PT_CODE [1]
@@ -321,8 +354,228 @@ $ TOTAL_TRIPS         &lt;dbl&gt; 3, 5, 3, 5, 4, 1, 24, 2, 1, 7, 3, 2, 5, 1, 1, 
 6 01012          07371                  14</code></pre>
 </div>
 </div>
+<p>Save output in rds for later use</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(origin6_9wdm, <span class="st">"data/rds/origin6_9wdm.rds"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Import rds file in R</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>origin6_9wdm <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">"data/rds/origin6_9wdm.rds"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="prepare-for-geospatial-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="prepare-for-geospatial-analysis"><strong>Prepare for Geospatial Analysis</strong></h3>
+<p>Map the bus stop codes to their geographical locations (latitude and longitude) by joining data with another dataset that contains these geographical coordinates.</p>
+<p>below 2 data will be used:</p>
+<ul>
+<li><p><em>Bus Stop Location</em> (Last updated Jul 2023) from <a href="https://datamall.lta.gov.sg/content/datamall/en/static-data.html"><strong>LTADataMall</strong></a> (Last updated Jul 2023)</p></li>
+<li><p><em>Master Plan 2019 Subzone Boundary (No Sea)</em> from <a href="https://beta.data.gov.sg/">Data.gov.sg</a> updated on December 23, 2019</p></li>
+<li><p><em>hexagon</em>, a <a href="https://desktop.arcgis.com/en/arcmap/latest/tools/spatial-statistics-toolbox/h-whyhexagons.htm">hexagon</a> layer of 375m (this distance is the perpendicular distance between the centre of the hexagon and its edges.)</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>busstop <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/geospatial"</span>,</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>                   <span class="at">layer =</span> <span class="st">"BusStop"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">3414</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `BusStop' from data source 
+  `C:\kekekay\ISSS624\Take-home_Ex2\data\geospatial' using driver `ESRI Shapefile'
+Simple feature collection with 5161 features and 3 fields
+Geometry type: POINT
+Dimension:     XY
+Bounding box:  xmin: 3970.122 ymin: 26482.1 xmax: 48284.56 ymax: 52983.82
+Projected CRS: SVY21</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>mpsz <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/geospatial"</span>,</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>                   <span class="at">layer =</span> <span class="st">"MPSZ-2019"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">3414</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `MPSZ-2019' from data source 
+  `C:\kekekay\ISSS624\Take-home_Ex2\data\geospatial' using driver `ESRI Shapefile'
+Simple feature collection with 332 features and 6 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: 103.6057 ymin: 1.158699 xmax: 104.0885 ymax: 1.470775
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+</div>
+<p>write mpsz sf tibble data frame into an rds file and import in R enviroment</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>mpsz <span class="ot">&lt;-</span> <span class="fu">write_rds</span>(mpsz, <span class="st">"data/rds/mpsz.rds"</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>mpsz <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">"data/rds/mpsz.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(busstop)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 5,161
+Columns: 4
+$ BUS_STOP_N &lt;chr&gt; "22069", "32071", "44331", "96081", "11561", "66191", "2338…
+$ BUS_ROOF_N &lt;chr&gt; "B06", "B23", "B01", "B05", "B05", "B03", "B02A", "B02", "B…
+$ LOC_DESC   &lt;chr&gt; "OPP CEVA LOGISTICS", "AFT TRACK 13", "BLK 239", "GRACE IND…
+$ geometry   &lt;POINT [m]&gt; POINT (13576.31 32883.65), POINT (13228.59 44206.38),…</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(mpsz)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 332
+Columns: 7
+$ SUBZONE_N  &lt;chr&gt; "MARINA EAST", "INSTITUTION HILL", "ROBERTSON QUAY", "JURON…
+$ SUBZONE_C  &lt;chr&gt; "MESZ01", "RVSZ05", "SRSZ01", "WISZ01", "MUSZ02", "MPSZ05",…
+$ PLN_AREA_N &lt;chr&gt; "MARINA EAST", "RIVER VALLEY", "SINGAPORE RIVER", "WESTERN …
+$ PLN_AREA_C &lt;chr&gt; "ME", "RV", "SR", "WI", "MU", "MP", "WI", "WI", "SI", "SI",…
+$ REGION_N   &lt;chr&gt; "CENTRAL REGION", "CENTRAL REGION", "CENTRAL REGION", "WEST…
+$ REGION_C   &lt;chr&gt; "CR", "CR", "CR", "WR", "CR", "CR", "WR", "WR", "CR", "CR",…
+$ geometry   &lt;MULTIPOLYGON [m]&gt; MULTIPOLYGON (((33222.98 29..., MULTIPOLYGON (…</code></pre>
+</div>
+</div>
+</section>
+<section id="join-od-data-with-geospatial-data" class="level3">
+<h3 class="anchored" data-anchor-id="join-od-data-with-geospatial-data"><strong>Join OD Data with Geospatial Data</strong></h3>
+<p>associate each bus stop code in your origin-destination (OD) data with its corresponding geographical location from the <strong><code>busstop</code></strong> dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Join OD data with bus stop geospatial data for both origin and destination</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>origin6_9wdm_geo <span class="ot">&lt;-</span> origin6_9wdm <span class="sc">%&gt;%</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(busstop, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"ORIGIN_PT_CODE"</span> <span class="ot">=</span> <span class="st">"BUS_STOP_N"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(busstop, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"DESTINATION_PT_CODE"</span> <span class="ot">=</span> <span class="st">"BUS_STOP_N"</span>), <span class="at">suffix =</span> <span class="fu">c</span>(<span class="st">"_origin"</span>, <span class="st">"_dest"</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in left_join(., busstop, by = c(ORIGIN_PT_CODE = "BUS_STOP_N")): Detected an unexpected many-to-many relationship between `x` and `y`.
+ℹ Row 25632 of `x` matches multiple rows in `y`.
+ℹ Row 1335 of `y` matches multiple rows in `x`.
+ℹ If a many-to-many relationship is expected, set `relationship =
+  "many-to-many"` to silence this warning.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in left_join(., busstop, by = c(DESTINATION_PT_CODE = "BUS_STOP_N"), : Detected an unexpected many-to-many relationship between `x` and `y`.
+ℹ Row 167 of `x` matches multiple rows in `y`.
+ℹ Row 293 of `y` matches multiple rows in `x`.
+ℹ If a many-to-many relationship is expected, set `relationship =
+  "many-to-many"` to silence this warning.</code></pre>
+</div>
+</div>
+</section>
+<section id="create-analytical-hexagons" class="level3">
+<h3 class="anchored" data-anchor-id="create-analytical-hexagons"><strong>Create Analytical Hexagons</strong></h3>
+<p>Create a hexagonal grid to represent Traffic Analysis Zones (TAZs) and add ID to each hexagon:</p>
+<p>hide code here</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>hexagon_grid <span class="ot">=</span> <span class="fu">st_make_grid</span>(mpsz, <span class="fu">c</span>(<span class="dv">700</span>, <span class="dv">700</span>), <span class="at">what =</span> <span class="st">"polygons"</span>, <span class="at">square =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>hexagon_grid_sf <span class="ot">=</span> <span class="fu">st_sf</span>(hexagon_grid) <span class="sc">%&gt;%</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">grid_id =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(<span class="fu">lengths</span>(hexagon_grid)))</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>busstop_grid <span class="ot">&lt;-</span> <span class="fu">st_intersection</span>(hexagon_grid_sf,busstop) <span class="sc">%&gt;%</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(BUS_STOP_N, grid_id) <span class="sc">%&gt;%</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: attribute variables are assumed to be spatially constant throughout
+all geometries</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(busstop_grid, <span class="st">"data/rds/busstop_grid.rds"</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">write_rds</span>(hexagon_grid_sf, <span class="st">"data/rds/hexagon_grid_sf.rds"</span>)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>check_duplicate <span class="ot">&lt;-</span> busstop_grid <span class="sc">%&gt;%</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by_all</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">n</span>()<span class="sc">&gt;</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>busstop_grid <span class="ot">&lt;-</span> <span class="fu">unique</span>(busstop_grid)</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a><span class="co"># the check-duplicate should be empty</span></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>busstop_grid <span class="ot">&lt;-</span> busstop_grid <span class="sc">%&gt;%</span></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(grid_id) <span class="sc">&amp;</span> grid_id <span class="sc">&gt;</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>origin6_9wdm_geo<span class="sc">$</span>ORIGIN_PT_CODE <span class="ot">&lt;-</span> <span class="fu">as.character</span>(origin6_9wdm_geo<span class="sc">$</span>ORIGIN_PT_CODE)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>origin6_9wdm_geo<span class="sc">$</span>DESTINATION_PT_CODE <span class="ot">&lt;-</span> <span class="fu">as.character</span>(origin6_9wdm_geo<span class="sc">$</span>DESTINATION_PT_CODE)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>origin6_9wdm_geo <span class="ot">&lt;-</span> origin6_9wdm_geo <span class="sc">%&gt;%</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(busstop_grid, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"ORIGIN_PT_CODE"</span> <span class="ot">=</span> <span class="st">"BUS_STOP_N"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in left_join(., busstop_grid, by = c(ORIGIN_PT_CODE = "BUS_STOP_N")): Detected an unexpected many-to-many relationship between `x` and `y`.
+ℹ Row 114224 of `x` matches multiple rows in `y`.
+ℹ Row 1334 of `y` matches multiple rows in `x`.
+ℹ If a many-to-many relationship is expected, set `relationship =
+  "many-to-many"` to silence this warning.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>origin6_9wdm_geo <span class="ot">&lt;-</span> origin6_9wdm_geo <span class="sc">%&gt;%</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">ori_grid =</span> grid_id)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>origin6_9wdm_geo <span class="ot">&lt;-</span> origin6_9wdm_geo <span class="sc">%&gt;%</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(busstop_grid, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"DESTINATION_PT_CODE"</span> <span class="ot">=</span> <span class="st">"BUS_STOP_N"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in left_join(., busstop_grid, by = c(DESTINATION_PT_CODE = "BUS_STOP_N")): Detected an unexpected many-to-many relationship between `x` and `y`.
+ℹ Row 639 of `x` matches multiple rows in `y`.
+ℹ Row 293 of `y` matches multiple rows in `x`.
+ℹ If a many-to-many relationship is expected, set `relationship =
+  "many-to-many"` to silence this warning.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>origin6_9wdm_geo <span class="ot">&lt;-</span> origin6_9wdm_geo <span class="sc">%&gt;%</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">desti_grid =</span> grid_id)</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>origin6_9wdm_geo <span class="ot">&lt;-</span> origin6_9wdm_geo <span class="sc">%&gt;%</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(ORIGIN_PT_CODE, DESTINATION_PT_CODE))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>origin6_9wdm_geo <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(origin6_9wdm_geo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>origin6_9wdm_geo <span class="ot">&lt;-</span> origin6_9wdm_geo <span class="sc">%&gt;%</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(ori_grid, desti_grid, TRIPS)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="the-set.zoom.limits-argument-ensures-that-the-map-cannot-be-zommed-out-beyond-singapore-and-also-cannot-be-zoomed-in-too-much-such-that-the-map-cannot-be-loaded." class="level1">
+<h1><strong>The&nbsp;<code>set.zoom.limits</code>&nbsp;argument ensures that the map cannot be zommed out beyond Singapore and also cannot be zoomed in too much such that the map cannot be loaded.</strong></h1>
+<section id="visualising-spatial-interaction" class="level2">
+<h2 class="anchored" data-anchor-id="visualising-spatial-interaction"><strong>Visualising Spatial Interaction</strong></h2>
+<p>prepare a desire line by using&nbsp;<strong>stplanr</strong>&nbsp;package</p>
+<section id="removing-intra-zonal-flows" class="level3">
+<h3 class="anchored" data-anchor-id="removing-intra-zonal-flows"><strong>Removing intra-zonal flows</strong></h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>origin6_9wdm_geo1 <span class="ot">&lt;-</span> origin6_9wdm_geo[origin6_9wdm_geo<span class="sc">$</span>ori_grid <span class="sc">!=</span> origin6_9wdm_geo<span class="sc">$</span>desti_grid, ]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="creating-desire-lines" class="level3">
+<h3 class="anchored" data-anchor-id="creating-desire-lines">Creating desire lines</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>flowLine <span class="ot">&lt;-</span> <span class="fu">od2line</span>(<span class="at">flow =</span> origin6_9wdm_geo1, </span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">zones =</span> hexagon_grid_sf,</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">zone_code =</span> <span class="st">"grid_id"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Creating centroids representing desire line start and end points.</code></pre>
+</div>
+</div>
+</section>
+<section id="visualizing-the-desired-lines" class="level3">
+<h3 class="anchored" data-anchor-id="visualizing-the-desired-lines">Visualizing the desired lines</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(mpsz) <span class="sc">+</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>() <span class="sc">+</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>flowLine <span class="sc">%&gt;%</span>  </span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>() <span class="sc">+</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_lines</span>(<span class="at">lwd =</span> <span class="st">"TRIPS"</span>,</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">style =</span> <span class="st">"quantile"</span>,</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">scale =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">7</span>, <span class="dv">10</span>),</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>           <span class="at">n =</span> <span class="dv">6</span>,</span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>           <span class="at">alpha =</span> <span class="fl">0.3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in g$scale * (w_legend/maxW): longer object length is not a multiple of
+shorter object length</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in g$scale * (x/maxW): longer object length is not a multiple of
+shorter object length</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Legend labels were too wide. Therefore, legend.text.size has been set to 0.49. Increase legend.width (argument of tm_layout) to make the legend wider and therefore the labels larger.</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="takehome2_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
 
 
+</section>
 </section>
 </section>
 
